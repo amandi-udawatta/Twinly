@@ -112,20 +112,6 @@ export function SiteHeaderNav({
       </ul>
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <Link
-          href="/dashboard"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F5C518] transition-transform hover:scale-105 sm:h-9 sm:w-9"
-          aria-label="Dashboard"
-        >
-          <Image
-            src="/hero/alert-circle-svgrepo-com.svg"
-            alt=""
-            width={20}
-            height={20}
-            className="h-3.5 w-3.5 brightness-0 sm:h-4 sm:w-4"
-          />
-        </Link>
-
         {isAuthenticated ? (
           <UserMenu variant="hero" />
         ) : (

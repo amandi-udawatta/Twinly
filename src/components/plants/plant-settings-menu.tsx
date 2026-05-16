@@ -9,11 +9,22 @@ import {
   updatePlant,
   type PlantActionResult,
 } from "@/app/plants/[id]/actions";
+import {
+  dashboardCard,
+  dashboardCtaPrimary,
+  dashboardCtaSecondary,
+  dashboardInput,
+  dashboardMuted,
+  dashboardPanel,
+  dashboardPanelTitle,
+  twinlyLabel,
+} from "@/components/dashboard/dashboard-theme";
 import { PhotoDropzone } from "@/components/plants/photo-dropzone";
 import { ErrorBanner } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export interface PlantSettingsPlant {
   id: string;
@@ -27,6 +38,26 @@ interface PlantSettingsMenuProps {
   checkinCount: number;
 }
 
+const menuPanelClassName =
+  "absolute right-0 z-40 mt-2 min-w-[11rem] overflow-hidden rounded-2xl border border-white/10 bg-black/50 py-1 font-poppins shadow-[0_8px_32px_rgba(0,0,0,0.2)] backdrop-blur-md";
+
+const menuItemClassName =
+  "w-full px-4 py-2.5 text-left text-sm text-white/85 transition-colors hover:bg-white/10";
+
+/** Below fixed SiteHeader (z-[100]); main uses pt-24 for the same offset. */
+const dialogOverlayClassName =
+  "fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-black/70 px-4 pb-6 pt-24 font-poppins sm:px-6 sm:pt-28";
+
+const dialogPanelClassName = cn(
+  "w-full overflow-y-auto p-6",
+  dashboardPanel,
+);
+
+const settingsTriggerClassName = cn(dashboardCtaPrimary, "h-9 px-4 text-sm");
+
+const deleteCtaClassName =
+  "flex-1 rounded-full border border-red-500/40 bg-red-500/15 px-6 py-2.5 font-poppins text-sm font-medium text-red-400 shadow-md transition-all hover:scale-[1.02] hover:bg-red-500/25 active:scale-[0.98]";
+
 export function PlantSettingsMenu({
   plant,
   displayName,
@@ -39,16 +70,15 @@ export function PlantSettingsMenu({
   return (
     <>
       <div className="relative">
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="sm"
           onClick={() => setMenuOpen((open) => !open)}
+          className={settingsTriggerClassName}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
         >
           Plant settings
-        </Button>
+        </button>
         {menuOpen ? (
           <>
             <button
@@ -57,14 +87,11 @@ export function PlantSettingsMenu({
               aria-label="Close menu"
               onClick={() => setMenuOpen(false)}
             />
-            <div
-              role="menu"
-              className="absolute right-0 z-40 mt-2 min-w-[10rem] rounded-lg border border-border bg-card py-1 shadow-lg"
-            >
+            <div role="menu" className={menuPanelClassName}>
               <button
                 type="button"
                 role="menuitem"
-                className="w-full px-4 py-2 text-left text-sm hover:bg-muted"
+                className={menuItemClassName}
                 onClick={() => {
                   setMenuOpen(false);
                   setEditOpen(true);
@@ -75,7 +102,7 @@ export function PlantSettingsMenu({
               <button
                 type="button"
                 role="menuitem"
-                className="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-muted"
+                className={cn(menuItemClassName, "text-red-400 hover:bg-red-500/10")}
                 onClick={() => {
                   setMenuOpen(false);
                   setDeleteOpen(true);
@@ -151,19 +178,21 @@ function EditPlantDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+      className={dialogOverlayClassName}
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-plant-title"
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-xl">
-        <h2
-          id="edit-plant-title"
-          className="font-heading text-xl font-semibold"
-        >
+      <div
+        className={cn(
+          dialogPanelClassName,
+          "max-h-[calc(100vh-7rem)] max-w-lg sm:max-h-[calc(100vh-8rem)]",
+        )}
+      >
+        <h2 id="edit-plant-title" className={dashboardPanelTitle}>
           Edit plant
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className={cn("mt-2", dashboardMuted)}>
           You can change the nickname and cover photo only. Species, age, and
           history stay as registered at setup.
         </p>
@@ -176,9 +205,14 @@ function EditPlantDialog({
 
         <form action={submit} className="mt-6 space-y-4">
           <div className="space-y-2">
-            <Label>Cover photo (optional)</Label>
+            <Label className={twinlyLabel}>Cover photo (optional)</Label>
             {plant.image_url && files.length === 0 ? (
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted">
+              <div
+                className={cn(
+                  "relative aspect-[4/3] overflow-hidden rounded-xl",
+                  dashboardCard,
+                )}
+              >
                 <Image
                   src={plant.image_url}
                   alt=""
@@ -192,31 +226,38 @@ function EditPlantDialog({
               maxFiles={1}
               onFilesChange={setFiles}
               label="Replace cover photo"
+              appearance="twinly"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-nickname">Nickname</Label>
+            <Label htmlFor="edit-nickname" className={twinlyLabel}>
+              Nickname
+            </Label>
             <Input
               id="edit-nickname"
               name="nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder="e.g. chillie 1"
+              className={dashboardInput}
             />
           </div>
 
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-3 pt-2">
             <Button
               type="button"
-              variant="outline"
-              className="flex-1"
+              className={cn("h-auto flex-1", dashboardCtaSecondary)}
               onClick={onClose}
               disabled={pending}
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={pending}>
+            <Button
+              type="submit"
+              className={cn("h-auto flex-1", dashboardCtaPrimary)}
+              disabled={pending}
+            >
               {pending ? "Saving…" : "Save changes"}
             </Button>
           </div>
@@ -261,21 +302,21 @@ function DeletePlantDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+      className={dialogOverlayClassName}
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-plant-title"
     >
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
+      <div className={cn(dialogPanelClassName, "max-w-md")}>
         <h2
           id="delete-plant-title"
-          className="font-heading text-xl font-semibold text-destructive"
+          className={cn(dashboardPanelTitle, "text-red-400")}
         >
           Delete plant?
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{displayName}</span> and
-          all data will be removed permanently, including{" "}
+        <p className={cn("mt-2", dashboardMuted)}>
+          <span className="font-medium text-white">{displayName}</span> and all
+          data will be removed permanently, including{" "}
           {checkinCount > 0 ? checkinLabel : "any check-ins"} and photos in
           storage. This cannot be undone.
         </p>
@@ -286,25 +327,23 @@ function DeletePlantDialog({
           </div>
         ) : null}
 
-        <div className="mt-6 flex gap-2">
+        <div className="mt-6 flex gap-3">
           <Button
             type="button"
-            variant="outline"
-            className="flex-1"
+            className={cn("h-auto flex-1", dashboardCtaSecondary)}
             onClick={onClose}
             disabled={pending}
           >
             Cancel
           </Button>
-          <Button
+          <button
             type="button"
-            variant="destructive"
-            className="flex-1"
+            className={cn(deleteCtaClassName, pending && "pointer-events-none opacity-50")}
             disabled={pending}
             onClick={onConfirm}
           >
             {pending ? "Deleting…" : "Delete plant"}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
