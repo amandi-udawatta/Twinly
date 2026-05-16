@@ -6,7 +6,11 @@ interface PageShellProps {
   description?: string;
 }
 
-export function PageShell({ children, title, description }: PageShellProps) {
+export async function PageShell({
+  children,
+  title,
+  description,
+}: PageShellProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />

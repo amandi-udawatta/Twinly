@@ -39,8 +39,7 @@ export interface Database {
           user_id: string;
           nickname: string | null;
           species: string | null;
-          growth_stage: string | null;
-          approximate_age: string | null;
+          approximate_age: number | null;
           history_note: string | null;
           image_url: string | null;
           created_at: string;
@@ -50,8 +49,7 @@ export interface Database {
           user_id: string;
           nickname?: string | null;
           species?: string | null;
-          growth_stage?: string | null;
-          approximate_age?: string | null;
+          approximate_age?: number | null;
           history_note?: string | null;
           image_url?: string | null;
           created_at?: string;
@@ -61,8 +59,7 @@ export interface Database {
           user_id?: string;
           nickname?: string | null;
           species?: string | null;
-          growth_stage?: string | null;
-          approximate_age?: string | null;
+          approximate_age?: number | null;
           history_note?: string | null;
           image_url?: string | null;
           created_at?: string;
