@@ -1,5 +1,9 @@
 import Image from "next/image";
 
+import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
+import { dashboardCard, dashboardMuted } from "@/components/dashboard/dashboard-theme";
+import { cn } from "@/lib/utils";
+
 interface GalleryItem {
   id: string;
   date: string;
@@ -8,6 +12,7 @@ interface GalleryItem {
 
 interface PlantGalleryProps {
   items: GalleryItem[];
+  appearance?: AppAppearance;
 }
 
 function groupByDate(items: GalleryItem[]): Array<{ date: string; urls: string[] }> {
@@ -21,10 +26,22 @@ function groupByDate(items: GalleryItem[]): Array<{ date: string; urls: string[]
   return Array.from(byDate.entries()).map(([date, urls]) => ({ date, urls }));
 }
 
-export function PlantGallery({ items }: PlantGalleryProps) {
+export function PlantGallery({
+  items,
+  appearance = "default",
+}: PlantGalleryProps) {
+  const isTwinly = appearance === "twinly";
+
   if (items.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No photos from check-ins yet.</p>
+      <p
+        className={cn(
+          "font-poppins text-sm",
+          isTwinly ? dashboardMuted : "text-muted-foreground",
+        )}
+      >
+        No photos from check-ins yet.
+      </p>
     );
   }
 
@@ -34,7 +51,12 @@ export function PlantGallery({ items }: PlantGalleryProps) {
     <div className="space-y-8">
       {groups.map((group) => (
         <section key={group.date}>
-          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+          <h3
+            className={cn(
+              "mb-3 font-poppins text-sm font-medium",
+              isTwinly ? "text-white/60" : "text-muted-foreground",
+            )}
+          >
             {group.date}
           </h3>
           <div className="-mx-1 overflow-x-auto px-1 pb-2">
@@ -42,7 +64,12 @@ export function PlantGallery({ items }: PlantGalleryProps) {
               {group.urls.map((url, i) => (
                 <li
                   key={`${group.date}-${url}-${i}`}
-                  className="relative h-36 w-36 shrink-0 overflow-hidden rounded-lg border border-border sm:h-40 sm:w-40"
+                  className={cn(
+                    "relative h-36 w-36 shrink-0 overflow-hidden rounded-lg sm:h-40 sm:w-40",
+                    isTwinly
+                      ? cn(dashboardCard, "border-white/10")
+                      : "border border-border",
+                  )}
                 >
                   <Image
                     src={url}

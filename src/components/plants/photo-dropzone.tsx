@@ -12,11 +12,15 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ErrorBanner } from "@/components/ui/feedback";
 
+import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
+import { dashboardMuted } from "@/components/dashboard/dashboard-theme";
+
 interface PhotoDropzoneProps {
   maxFiles?: number;
   onFilesChange: (files: File[]) => void;
   disabled?: boolean;
   label?: string;
+  appearance?: AppAppearance;
 }
 
 export function PhotoDropzone({
@@ -24,7 +28,9 @@ export function PhotoDropzone({
   onFilesChange,
   disabled = false,
   label = "Drop photos here or click to upload",
+  appearance = "default",
 }: PhotoDropzoneProps) {
+  const isTwinly = appearance === "twinly";
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -70,14 +76,20 @@ export function PhotoDropzone({
         className={cn(
           "flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors",
           isDragActive
-            ? "border-primary bg-primary/10 shadow-[0_0_24px_rgba(74,222,128,0.25)]"
-            : "border-border hover:border-primary/60 hover:bg-primary/5",
+            ? isTwinly
+              ? "border-[#57B55D] bg-[#57B55D]/10 shadow-[0_0_24px_rgba(87,181,93,0.3)]"
+              : "border-primary bg-primary/10 shadow-[0_0_24px_rgba(74,222,128,0.25)]"
+            : isTwinly
+              ? "border-white/20 hover:border-[#57B55D]/60 hover:bg-[#57B55D]/5"
+              : "border-border hover:border-primary/60 hover:bg-primary/5",
           disabled && "pointer-events-none opacity-50",
         )}
       >
         <input {...getInputProps()} />
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className={cn("font-poppins text-sm", isTwinly ? dashboardMuted : "text-muted-foreground")}>
+          {label}
+        </p>
+        <p className={cn("mt-1 font-poppins text-xs", isTwinly ? dashboardMuted : "text-muted-foreground")}>
           {files.length}/{maxFiles} images · JPG, PNG, WebP
         </p>
       </div>
@@ -89,7 +101,10 @@ export function PhotoDropzone({
           {previews.map((src, i) => (
             <li
               key={src}
-              className="relative aspect-square overflow-hidden rounded-lg border border-border"
+              className={cn(
+                "relative aspect-square overflow-hidden rounded-lg border",
+                isTwinly ? "border-white/15" : "border-border",
+              )}
             >
               <Image
                 src={src}

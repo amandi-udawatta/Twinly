@@ -8,13 +8,24 @@ import { HealthScoreRing } from "@/components/plants/health-score-ring";
 import { HealthTimelineChart } from "@/components/plants/health-timeline-chart";
 import { InterventionsPanel } from "@/components/plants/interventions-panel";
 import { PhotoComparePanel } from "@/components/plants/photo-compare-panel";
+import {
+  dashboardBody,
+  dashboardCard,
+  dashboardMuted,
+  dashboardPanel,
+  dashboardPanelTitle,
+  twinlyListRow,
+  twinlyPageTitlePoppins,
+} from "@/components/dashboard/dashboard-theme";
 import { PlantGallery } from "@/components/plants/plant-gallery";
 import { PlantFloatingCheckin } from "@/components/plants/plant-floating-checkin";
 import { PlantSettingsMenu } from "@/components/plants/plant-settings-menu";
+import { PlantPageTabs } from "@/components/plants/plant-page-tabs";
 import { QrDisplay } from "@/components/plants/qr-display";
 import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
 import { PageShell } from "@/components/layout/page-shell";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { WeatherSummaryPanel } from "@/components/dashboard/weather-summary-panel";
 import { UpcomingRisksCard } from "@/components/plants/upcoming-risks-card";
 import {
@@ -117,11 +128,16 @@ export default async function PlantPage({ params }: PlantPageProps) {
       : null;
 
   return (
-    <PageShell>
-      <LocationWeatherBanner show={!weatherContext.locationCity} />
+    <PageShell variant="twinly">
+      <LocationWeatherBanner show={!weatherContext.locationCity} variant="twinly" />
       <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex gap-6">
-          <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+          <div
+            className={cn(
+              "relative h-28 w-28 shrink-0 overflow-hidden rounded-xl",
+              dashboardCard,
+            )}
+          >
             {plant.image_url ? (
               <Image
                 src={plant.image_url}
@@ -132,24 +148,24 @@ export default async function PlantPage({ params }: PlantPageProps) {
                 priority
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+              <div className={cn("flex h-full items-center justify-center font-poppins text-xs", dashboardMuted)}>
                 No photo
               </div>
             )}
           </div>
           <div>
-            <h1 className="font-heading text-3xl font-semibold">{displayName}</h1>
-            <p className="text-muted-foreground capitalize">{plant.species}</p>
+            <h1 className={twinlyPageTitlePoppins}>{displayName}</h1>
+            <p className={cn("font-poppins capitalize", dashboardMuted)}>{plant.species}</p>
             {ageLabel ? (
-              <p className="mt-1 text-sm text-muted-foreground">{ageLabel} old</p>
+              <p className={cn("mt-1 font-poppins text-sm", dashboardMuted)}>{ageLabel} old</p>
             ) : null}
           </div>
         </div>
         <div className="flex flex-col items-center gap-3 sm:items-end">
           {latestAnalysis ? (
-            <HealthScoreRing score={latestAnalysis.health_score} />
+            <HealthScoreRing score={latestAnalysis.health_score} appearance="twinly" />
           ) : (
-            <p className="text-sm text-muted-foreground">No health score yet</p>
+            <p className={cn("font-poppins text-sm", dashboardMuted)}>No health score yet</p>
           )}
           <PlantSettingsMenu
             plant={{
@@ -164,46 +180,42 @@ export default async function PlantPage({ params }: PlantPageProps) {
       </div>
 
       <div className="pb-28">
-      <Tabs defaultValue="analysis" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="analysis">Today&apos;s analysis</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="gallery">Gallery</TabsTrigger>
-          <TabsTrigger value="predictions">Predictions</TabsTrigger>
-          <TabsTrigger value="care">Care log</TabsTrigger>
-          <TabsTrigger value="qr">QR code</TabsTrigger>
-        </TabsList>
-
+      <PlantPageTabs>
         <TabsContent value="analysis" className="space-y-4">
           <ChangesSinceCard
             summary={latestAnalysis?.changes_summary}
             scoreDelta={scoreDelta}
+            appearance="twinly"
           />
           {insights.length === 0 ? (
-            <p className="text-muted-foreground">
-              Complete a check-in to see AI insights.
-            </p>
+            <p className={dashboardMuted}>Complete a check-in to see AI insights.</p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {insights.map((insight, i) => (
-                <InsightCard key={`${insight.title}-${i}`} insight={insight} index={i} />
+                <InsightCard
+                  key={`${insight.title}-${i}`}
+                  insight={insight}
+                  index={i}
+                  appearance="twinly"
+                />
               ))}
             </div>
           )}
-          <RecommendationsCard recommendations={recommendations} />
+          <RecommendationsCard recommendations={recommendations} appearance="twinly" />
           {latestAnalysis?.weather_impact ? (
-            <div className="rounded-lg border border-border bg-card p-4 text-sm">
-              <p className="font-medium">Weather impact</p>
-              <p className="mt-1 text-muted-foreground">
-                {latestAnalysis.weather_impact}
-              </p>
+            <div className={cn(dashboardPanel, "font-poppins text-sm")}>
+              <p className={dashboardPanelTitle}>Weather impact</p>
+              <p className={cn("mt-2", dashboardBody)}>{latestAnalysis.weather_impact}</p>
             </div>
           ) : null}
         </TabsContent>
 
         <TabsContent value="history">
-          <HealthTimelineChart data={chartData} />
-          <ul className="mt-6 space-y-2">
+          <HealthTimelineChart data={chartData} appearance="twinly" />
+          <h3 className={cn(dashboardPanelTitle, "mt-2 text-base sm:text-lg")}>
+            Check-in history
+          </h3>
+          <ul className="mt-4 space-y-3">
             {history
               .slice()
               .reverse()
@@ -212,22 +224,22 @@ export default async function PlantPage({ params }: PlantPageProps) {
                 return (
                   <li
                     key={h.id}
-                    className="rounded-lg border border-border px-4 py-3 text-sm"
+                    className={twinlyListRow}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span>{h.created_at.slice(0, 10)}</span>
-                      <span className="font-medium">Score {h.health_score}</span>
-                      <span className="capitalize text-muted-foreground">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4 sm:gap-y-1">
+                      <span className="shrink-0 text-white/90">{h.created_at.slice(0, 10)}</span>
+                      <span className="shrink-0 font-medium text-[#57B55D]">
+                        Score {h.health_score}
+                      </span>
+                      <span className={cn("shrink-0 capitalize", dashboardMuted)}>
                         {h.health_trend}
                       </span>
                     </div>
                     {h.changes_summary ? (
-                      <p className="mt-2 text-muted-foreground">
-                        {h.changes_summary}
-                      </p>
+                      <p className={cn("mt-2", dashboardBody)}>{h.changes_summary}</p>
                     ) : null}
                     {snapshot ? (
-                      <p className="mt-2 text-xs text-muted-foreground">
+                      <p className={cn("mt-2 font-poppins text-xs", dashboardMuted)}>
                         Weather at check-in: {formatWeatherCompact(snapshot)}
                       </p>
                     ) : null}
@@ -238,17 +250,22 @@ export default async function PlantPage({ params }: PlantPageProps) {
         </TabsContent>
 
         <TabsContent value="gallery" className="space-y-6">
-          <PhotoComparePanel plantId={id} checkins={compareOptions} />
-          <PlantGallery items={galleryItems} />
+          <PhotoComparePanel
+            plantId={id}
+            checkins={compareOptions}
+            appearance="twinly"
+          />
+          <PlantGallery items={galleryItems} appearance="twinly" />
         </TabsContent>
 
         <TabsContent value="predictions" className="space-y-6">
-          <p className="text-sm text-muted-foreground">
+          <p className={dashboardMuted}>
             Live forecast from WeatherAPI (refreshes about every 30 minutes).
             Plant outlook below is from your last check-in
             {lastCheckinLabel ? ` on ${lastCheckinLabel}` : ""}.
           </p>
           <WeatherSummaryPanel
+            appearance="twinly"
             title="Live forecast (WeatherAPI)"
             weather={weatherContext.weather}
             error={weatherContext.error}
@@ -257,21 +274,22 @@ export default async function PlantPage({ params }: PlantPageProps) {
           />
           {prediction ? (
             <div className="space-y-3">
-              <h3 className="font-heading text-lg font-semibold">
+              <h3 className={cn(dashboardPanelTitle, "text-lg")}>
                 AI plant outlook (Gemini)
               </h3>
               <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <p className="font-medium">Next 14 days</p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {prediction.next14Days}
-                  </p>
+                <div className={cn(dashboardPanel, "font-poppins text-sm")}>
+                  <p className="font-semibold text-[#57B55D]">Next 14 days</p>
+                  <p className={cn("mt-2", dashboardBody)}>{prediction.next14Days}</p>
                 </div>
-                <UpcomingRisksCard upcomingRisks={prediction.upcomingRisks} />
+                <UpcomingRisksCard
+                  upcomingRisks={prediction.upcomingRisks}
+                  appearance="twinly"
+                />
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground">
+            <p className={dashboardMuted}>
               AI plant outlook appears after your first check-in. Live forecast
               above uses your saved city.
             </p>
@@ -279,14 +297,18 @@ export default async function PlantPage({ params }: PlantPageProps) {
         </TabsContent>
 
         <TabsContent value="care">
-          <InterventionsPanel plantId={id} interventions={interventions} />
+          <InterventionsPanel
+            plantId={id}
+            interventions={interventions}
+            appearance="twinly"
+          />
         </TabsContent>
 
         <TabsContent value="qr">
-          <QrDisplay plantId={id} appUrl={appUrl} />
+          <QrDisplay plantId={id} appUrl={appUrl} appearance="twinly" />
         </TabsContent>
-      </Tabs>
-      <PlantFloatingCheckin plantId={id} />
+      </PlantPageTabs>
+      <PlantFloatingCheckin plantId={id} appearance="twinly" />
       </div>
     </PageShell>
   );

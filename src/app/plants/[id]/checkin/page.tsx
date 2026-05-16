@@ -61,19 +61,23 @@ export default async function CheckinPage({ params }: CheckinPageProps) {
 
   return (
     <PageShell
+      variant="twinly"
+      titleFont="poppins"
       title="Daily check-in"
       description="Upload fresh photos for an AI health analysis."
     >
-      <LocationWeatherBanner show={!weatherContext.locationCity} />
+      <LocationWeatherBanner show={!weatherContext.locationCity} variant="twinly" />
       <div className="mx-auto max-w-xl space-y-6">
         <CheckinWeatherStrip
           weather={weatherContext.weather}
           error={weatherContext.error}
+          appearance="twinly"
         />
         <CheckinForm
           plantId={plant.id}
           plantName={plantName}
           recentContext={recentContext}
+          appearance="twinly"
         />
       </div>
     </PageShell>
