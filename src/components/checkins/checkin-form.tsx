@@ -8,8 +8,12 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { PhotoDropzone } from "@/components/plants/photo-dropzone";
+import { AnalysisContextPanel } from "@/components/checkins/analysis-context-panel";
+import { ChangesSinceCard } from "@/components/checkins/changes-since-card";
 import { InsightCard } from "@/components/checkins/insight-card";
+import { RecommendationsCard } from "@/components/checkins/recommendations-card";
 import { ErrorBanner, LoadingState } from "@/components/ui/feedback";
+import type { AnalysisContext } from "@/types/analysis-context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,14 +24,22 @@ import { cn } from "@/lib/utils";
 interface CheckinFormProps {
   plantId: string;
   plantName: string;
+  recentContext?: string | null;
 }
 
-export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
+export function CheckinForm({
+  plantId,
+  plantName,
+  recentContext,
+}: CheckinFormProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<PlantReport | null>(null);
+  const [analysisContext, setAnalysisContext] = useState<AnalysisContext | null>(
+    null,
+  );
 
   const runAnalysis = async () => {
     if (files.length === 0) {
@@ -38,6 +50,7 @@ export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
     setLoading(true);
     setError(null);
     setReport(null);
+    setAnalysisContext(null);
 
     try {
       const formData = new FormData();
@@ -47,7 +60,7 @@ export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
 
       const res = await fetch("/api/analyze", { method: "POST", body: formData });
       const json = (await res.json()) as
-        | { report: PlantReport }
+        | { report: PlantReport; analysisContext?: AnalysisContext }
         | { error: string };
 
       if (!res.ok) {
@@ -55,7 +68,10 @@ export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
         return;
       }
 
-      setReport("report" in json ? json.report : null);
+      if ("report" in json) {
+        setReport(json.report);
+        setAnalysisContext(json.analysisContext ?? null);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed.");
     } finally {
@@ -74,12 +90,20 @@ export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
           <p className="mt-1 capitalize text-muted-foreground">
             Trend: {report.healthTrend}
           </p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Analyzed with Gemini on Google Cloud Vertex AI
+          </p>
         </div>
+        {analysisContext ? (
+          <AnalysisContextPanel context={analysisContext} />
+        ) : null}
+        <ChangesSinceCard summary={report.changesSinceLastScan} />
         <div className="grid gap-4 md:grid-cols-2">
           {report.insights.map((insight, i) => (
             <InsightCard key={`${insight.title}-${i}`} insight={insight} index={i} />
           ))}
         </div>
+        <RecommendationsCard recommendations={report.recommendations} />
         <Link
           href={`/plants/${plantId}`}
           className={cn(buttonVariants({ size: "lg" }))}
@@ -95,6 +119,9 @@ export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
       <p className="text-sm text-muted-foreground">
         Checking in: <span className="text-foreground">{plantName}</span>
       </p>
+      {recentContext ? (
+        <p className="text-xs text-muted-foreground">{recentContext}</p>
+      ) : null}
       <PhotoDropzone
         maxFiles={4}
         onFilesChange={setFiles}
@@ -114,7 +141,7 @@ export function CheckinForm({ plantId, plantName }: CheckinFormProps) {
       </div>
       {error ? <ErrorBanner message={error} /> : null}
       {loading ? (
-        <LoadingState message="Twinly is reading your plant…" />
+        <LoadingState message="Gemini on Vertex AI is analyzing your photos, history, and weather…" />
       ) : (
         <Button
           type="button"

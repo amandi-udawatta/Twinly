@@ -27,7 +27,7 @@ import {
   formatWeatherForPrompt,
 } from "@/services/weatherService";
 import { uploadPlantPhotos } from "@/services/storageService";
-import type { PlantReport } from "@/types/plant-report";
+import type { AnalysisContext } from "@/types/analysis-context";
 import type { Json } from "@/types/database";
 
 export async function POST(request: Request) {
@@ -96,6 +96,24 @@ export async function POST(request: Request) {
 
     const historySummaries = await getCheckInHistorySummaries(plantId);
 
+    const plantIdentity = [
+      plant.nickname ? `Nickname: ${plant.nickname}` : null,
+      plant.species ? `Species: ${plant.species}` : null,
+      plant.approximate_age != null
+        ? `Age: ${formatAgeDays(plant.approximate_age)}`
+        : null,
+      plant.history_note ? `History: ${plant.history_note}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    const analysisContext: AnalysisContext = {
+      plantIdentity: plantIdentity || "No profile details",
+      historySummary: historySummaries || "No prior check-ins.",
+      weatherSummary: weatherText,
+      photoCount: photoUrls.length,
+    };
+
     const rawReport = normalizeRawPlantReport(
       await analyzePlantCheckIn({
         plant: {
@@ -158,6 +176,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       checkinId: checkin.id,
       report: { ...report, insights },
+      analysisContext,
     });
   } catch (err) {
     const message =

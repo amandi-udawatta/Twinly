@@ -8,6 +8,7 @@ export interface WeatherSnapshot {
   temp_c: number;
   humidity: number;
   condition: string;
+  condition_icon: string;
   location: string;
   forecast: Array<{
     date: string;
@@ -15,7 +16,14 @@ export interface WeatherSnapshot {
     maxtemp_c: number;
     mintemp_c: number;
     condition: string;
+    condition_icon: string;
   }>;
+}
+
+function normalizeIconUrl(icon: string): string {
+  if (icon.startsWith("//")) return `https:${icon}`;
+  if (icon.startsWith("http")) return icon;
+  return `https:${icon}`;
 }
 
 interface WeatherApiCurrentResponse {
@@ -23,7 +31,7 @@ interface WeatherApiCurrentResponse {
   current: {
     temp_c: number;
     humidity: number;
-    condition: { text: string };
+    condition: { text: string; icon: string };
   };
   forecast?: {
     forecastday: Array<{
@@ -32,7 +40,7 @@ interface WeatherApiCurrentResponse {
         daily_chance_of_rain: number;
         maxtemp_c: number;
         mintemp_c: number;
-        condition: { text: string };
+        condition: { text: string; icon: string };
       };
     }>;
   };
@@ -74,6 +82,7 @@ export async function fetchWeatherForCity(
     temp_c: data.current.temp_c,
     humidity: data.current.humidity,
     condition: data.current.condition.text,
+    condition_icon: normalizeIconUrl(data.current.condition.icon),
     location: data.location.name,
     forecast:
       data.forecast?.forecastday.map((day) => ({
@@ -82,6 +91,7 @@ export async function fetchWeatherForCity(
         maxtemp_c: day.day.maxtemp_c,
         mintemp_c: day.day.mintemp_c,
         condition: day.day.condition.text,
+        condition_icon: normalizeIconUrl(day.day.condition.icon),
       })) ?? [],
   };
 }

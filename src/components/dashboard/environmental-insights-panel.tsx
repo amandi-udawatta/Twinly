@@ -23,12 +23,17 @@ export function EnvironmentalInsightsPanel({
         <ul className="mt-6 space-y-3">
           {insights.map((item) => (
             <li
-              key={`${item.plantName}-${item.date}`}
+              key={item.id}
               className="rounded-lg border border-border/80 bg-[#0D0D0D]/50 p-4"
             >
               <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                 <span className="font-medium text-primary">{item.plantName}</span>
-                <span>{item.date}</span>
+                <span>
+                  {new Date(item.createdAt).toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </span>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-foreground/90">
                 {item.text}

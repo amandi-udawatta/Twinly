@@ -6,9 +6,11 @@
 
 import { getVertexGenAIClient, VERTEX_GEMINI_MODEL } from "@/services/geminiService/client";
 import {
+  photoComparisonResponseSchema,
   rawPlantReportResponseSchema,
   speciesSuggestionResponseSchema,
 } from "@/services/geminiService/schemas";
+import type { PhotoComparisonResult } from "@/types/photo-comparison";
 import type { RawPlantReport } from "@/types/plant-report";
 
 export interface SpeciesSuggestion {
@@ -129,4 +131,58 @@ User note for this check-in: ${context.userNote ?? "None"}`;
   }
 
   return JSON.parse(text) as RawPlantReport;
+}
+
+export interface PhotoCompareContext {
+  species: string | null;
+  nickname: string | null;
+  beforeDate: string;
+  afterDate: string;
+}
+
+/**
+ * Compare two check-in photos over time (Vertex multimodal only).
+ */
+export async function comparePlantPhotos(
+  beforeImageUrl: string,
+  afterImageUrl: string,
+  context: PhotoCompareContext,
+): Promise<PhotoComparisonResult> {
+  const ai = getVertexGenAIClient();
+
+  const [beforePart, afterPart] = await Promise.all([
+    fetchImagePart(beforeImageUrl),
+    fetchImagePart(afterImageUrl),
+  ]);
+
+  const plantLabel =
+    context.nickname || context.species || "this plant";
+
+  const prompt = `You are Twinly's plant vision engine. Compare these two photos of the same plant taken on different dates.
+
+Plant: ${plantLabel}${context.species ? ` (${context.species})` : ""}
+Earlier photo date: ${context.beforeDate}
+Later photo date: ${context.afterDate}
+
+The first image is the earlier check-in; the second is the later check-in.
+Return JSON only with:
+- summary: 2-3 sentences for a home gardener
+- visibleChanges: array of specific visible differences (leaves, color, growth, damage, etc.)
+- healthDelta: one of improved, unchanged, declined, unclear`;
+
+  const response = await ai.models.generateContent({
+    model: VERTEX_GEMINI_MODEL,
+    contents: [prompt, beforePart, afterPart],
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: photoComparisonResponseSchema,
+    },
+  });
+
+  const text = response.text;
+  if (!text) {
+    throw new Error("Empty response from Vertex AI.");
+  }
+
+  return JSON.parse(text) as PhotoComparisonResult;
 }

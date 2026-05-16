@@ -4,6 +4,7 @@
  * Single Gemini insight card (PRD §5): severity border, category, action, confidence.
  */
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,13 +18,22 @@ const SEVERITY_BORDER: Record<InsightSeverity, string> = {
   critical: "border-l-destructive",
 };
 
+const COLLAPSED_DETAIL_CHARS = 160;
+
 interface InsightCardProps {
   insight: PlantInsight;
   index: number;
 }
 
 export function InsightCard({ insight, index }: InsightCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const confidencePct = Math.round(insight.confidence * 100);
+  const detailLong = insight.detail.length > COLLAPSED_DETAIL_CHARS;
+  const showToggle = detailLong;
+  const detailVisible =
+    expanded || !detailLong
+      ? insight.detail
+      : `${insight.detail.slice(0, COLLAPSED_DETAIL_CHARS).trimEnd()}…`;
 
   return (
     <motion.article
@@ -44,10 +54,19 @@ export function InsightCard({ insight, index }: InsightCardProps) {
         </span>
       </div>
       <h3 className="font-semibold">{insight.title}</h3>
-      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-        {insight.detail}
+      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+        {detailVisible}
       </p>
-      <div className="mt-3 rounded-md bg-muted/50 px-3 py-2 text-sm">
+      {showToggle ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          className="mt-2 text-xs font-medium text-primary hover:underline"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      ) : null}
+      <div className="mt-3 rounded-md bg-muted/50 px-3 py-2 text-sm leading-relaxed">
         <span className="font-medium">What to do: </span>
         {insight.action}
       </div>
