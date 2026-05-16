@@ -36,7 +36,7 @@ import {
   getUserWeatherContext,
   parseInsights,
 } from "@/lib/data/plants";
-import { formatAgeDays } from "@/lib/plant-age";
+import { formatPlantAge } from "@/lib/plant-age";
 import { getInterventionsForPlant } from "@/lib/data/interventions";
 import { parseRecommendations } from "@/lib/plant-report-display";
 import { formatWeatherCompact, parseWeatherSnapshot } from "@/lib/weather-display";
@@ -104,7 +104,7 @@ export default async function PlantPage({ params }: PlantPageProps) {
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const displayName = plant.nickname || plant.species || "Your plant";
-  const ageLabel = formatAgeDays(plant.approximate_age);
+  const ageLabel = formatPlantAge(plant.approximate_age, plant.created_at);
 
   const compareOptions = checkins
     .filter((c) => c.photo_urls?.length)
@@ -157,7 +157,9 @@ export default async function PlantPage({ params }: PlantPageProps) {
             <h1 className={twinlyPageTitlePoppins}>{displayName}</h1>
             <p className={cn("font-poppins capitalize", dashboardMuted)}>{plant.species}</p>
             {ageLabel ? (
-              <p className={cn("mt-1 font-poppins text-sm", dashboardMuted)}>{ageLabel} old</p>
+              <p className={cn("mt-1 font-poppins text-sm", dashboardMuted)}>
+                Age: {ageLabel}
+              </p>
             ) : null}
           </div>
         </div>

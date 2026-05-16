@@ -13,7 +13,7 @@ import {
 } from "@/lib/data/plants";
 import { isUploadBlob } from "@/lib/upload-file";
 import { createClient } from "@/lib/supabase/server";
-import { formatAgeDays } from "@/lib/plant-age";
+import { formatPlantAge } from "@/lib/plant-age";
 import {
   clampHealthScore,
   clampUrgencyScore,
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       plant.nickname ? `Nickname: ${plant.nickname}` : null,
       plant.species ? `Species: ${plant.species}` : null,
       plant.approximate_age != null
-        ? `Age: ${formatAgeDays(plant.approximate_age)}`
+        ? `Age: ${formatPlantAge(plant.approximate_age, plant.created_at)}`
         : null,
       plant.history_note ? `History: ${plant.history_note}` : null,
     ]
@@ -119,7 +119,10 @@ export async function POST(request: Request) {
         plant: {
           nickname: plant.nickname,
           species: plant.species,
-          approximateAge: formatAgeDays(plant.approximate_age),
+          approximateAge: formatPlantAge(
+            plant.approximate_age,
+            plant.created_at,
+          ),
           historyNote: plant.history_note,
         },
         historySummaries,
