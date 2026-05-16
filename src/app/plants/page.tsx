@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import {
+  dashboardCtaPrimary,
+  dashboardEmptyPanel,
+  dashboardMuted,
+} from "@/components/dashboard/dashboard-theme";
 import { PlantsFloatingActions } from "@/components/plants/plants-floating-actions";
 import { PlantsGrid } from "@/components/plants/plants-grid";
 import { PageShell } from "@/components/layout/page-shell";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
 import { getPlantsForUser, getUserLocationCity } from "@/lib/data/plants";
 import { getSessionUser } from "@/lib/auth/get-user";
+import { cn } from "@/lib/utils";
 
 export default async function PlantsPage() {
   const user = await getSessionUser();
@@ -32,37 +36,38 @@ export default async function PlantsPage() {
 
   return (
     <PageShell
+      variant="twinly"
       title="My Plants"
       description="Your garden at a glance — search, filter, and open any plant."
     >
-      <LocationWeatherBanner show={!locationCity} />
+      <LocationWeatherBanner show={!locationCity} variant="twinly" />
 
       {needsAttention ? (
         <p
           role="status"
-          className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
+          className="mb-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 font-poppins text-sm text-amber-200"
         >
           One or more plants may need attention soon.
         </p>
       ) : null}
 
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card py-16 text-center">
-          <p className="text-lg font-medium">No plants yet</p>
-          <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        <div className={dashboardEmptyPanel}>
+          <p className="font-poppins text-lg font-semibold text-white">
+            No plants yet
+          </p>
+          <p className={cn("mt-2 max-w-sm", dashboardMuted)}>
             Register your first plant to start its digital twin.
           </p>
-          <Link
-            href="/plants/new"
-            className={cn(buttonVariants({ size: "lg" }), "mt-6")}
-          >
+          <Link href="/plants/new" className={cn(dashboardCtaPrimary, "mt-6")}>
             Register a plant
           </Link>
         </div>
       ) : (
         <div className="pb-28">
-          <PlantsGrid plants={sorted} />
+          <PlantsGrid plants={sorted} appearance="twinly" />
           <PlantsFloatingActions
+            appearance="twinly"
             plants={sorted.map((p) => ({
               id: p.id,
               nickname: p.nickname,

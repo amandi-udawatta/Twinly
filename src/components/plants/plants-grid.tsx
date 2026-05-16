@@ -2,6 +2,13 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  dashboardEmptyPanel,
+  dashboardFilterActive,
+  dashboardFilterIdle,
+  dashboardInput,
+  dashboardMuted,
+} from "@/components/dashboard/dashboard-theme";
 import { PlantCard } from "@/components/dashboard/plant-card";
 import type { PlantWithLatestAnalysis } from "@/lib/data/plants";
 import { Input } from "@/components/ui/input";
@@ -25,11 +32,13 @@ function isOverdue(lastCheckIn: string | null): boolean {
 
 interface PlantsGridProps {
   plants: PlantWithLatestAnalysis[];
+  appearance?: "default" | "twinly";
 }
 
-export function PlantsGrid({ plants }: PlantsGridProps) {
+export function PlantsGrid({ plants, appearance = "default" }: PlantsGridProps) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<PlantFilter>("all");
+  const isTwinly = appearance === "twinly";
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -68,7 +77,10 @@ export function PlantsGrid({ plants }: PlantsGridProps) {
           placeholder="Search by name or plant type…"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          className="max-w-md bg-card"
+          className={cn(
+            "max-w-md",
+            isTwinly ? dashboardInput : "bg-card",
+          )}
           aria-label="Search plants"
         />
         <div className="flex flex-wrap gap-2">
@@ -78,10 +90,14 @@ export function PlantsGrid({ plants }: PlantsGridProps) {
               type="button"
               onClick={() => setFilter(item.id)}
               className={cn(
-                "rounded-full border px-3 py-1 text-sm transition-colors",
-                filter === item.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                "rounded-full border px-3 py-1 font-poppins text-sm transition-colors",
+                isTwinly
+                  ? filter === item.id
+                    ? dashboardFilterActive
+                    : dashboardFilterIdle
+                  : filter === item.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
               )}
             >
               {item.label}
@@ -91,9 +107,28 @@ export function PlantsGrid({ plants }: PlantsGridProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card py-16 text-center">
-          <p className="text-lg font-medium">No plants match</p>
-          <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        <div
+          className={
+            isTwinly
+              ? dashboardEmptyPanel
+              : "flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card py-16 text-center"
+          }
+        >
+          <p
+            className={
+              isTwinly
+                ? "font-poppins text-lg font-semibold text-white"
+                : "text-lg font-medium"
+            }
+          >
+            No plants match
+          </p>
+          <p
+            className={cn(
+              "mt-2 max-w-sm text-sm",
+              isTwinly ? dashboardMuted : "text-muted-foreground",
+            )}
+          >
             Try another search or filter, or register a new plant.
           </p>
         </div>
@@ -101,7 +136,7 @@ export function PlantsGrid({ plants }: PlantsGridProps) {
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((plant) => (
             <li key={plant.id}>
-              <PlantCard plant={plant} />
+              <PlantCard plant={plant} appearance={appearance} />
             </li>
           ))}
         </ul>

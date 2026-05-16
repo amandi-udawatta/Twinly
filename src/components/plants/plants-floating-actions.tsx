@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 
 import {
+  dashboardCtaPrimary,
+  dashboardCtaSecondary,
+} from "@/components/dashboard/dashboard-theme";
+import {
   DailyCheckInDialog,
   type DailyCheckInPlant,
 } from "@/components/plants/daily-checkin-dialog";
@@ -11,10 +15,15 @@ import { cn } from "@/lib/utils";
 
 interface PlantsFloatingActionsProps {
   plants: DailyCheckInPlant[];
+  appearance?: "default" | "twinly";
 }
 
-export function PlantsFloatingActions({ plants }: PlantsFloatingActionsProps) {
+export function PlantsFloatingActions({
+  plants,
+  appearance = "default",
+}: PlantsFloatingActionsProps) {
   const [checkInOpen, setCheckInOpen] = useState(false);
+  const isTwinly = appearance === "twinly";
 
   return (
     <>
@@ -22,7 +31,10 @@ export function PlantsFloatingActions({ plants }: PlantsFloatingActionsProps) {
         <Link
           href="/plants/new"
           className={cn(
-            "inline-flex h-12 items-center justify-center rounded-full border border-primary/30 bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02]",
+            "inline-flex h-12 items-center justify-center rounded-full px-5 text-sm font-semibold shadow-lg transition-transform hover:scale-[1.02]",
+            isTwinly
+              ? dashboardCtaPrimary
+              : "border border-primary/30 bg-primary text-primary-foreground shadow-primary/20",
           )}
         >
           + Register
@@ -30,7 +42,15 @@ export function PlantsFloatingActions({ plants }: PlantsFloatingActionsProps) {
         <button
           type="button"
           onClick={() => setCheckInOpen(true)}
-          className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground shadow-lg transition-transform hover:border-primary/40 hover:scale-[1.02]"
+          className={cn(
+            "inline-flex h-12 items-center justify-center rounded-full px-5 text-sm font-semibold shadow-lg transition-transform hover:scale-[1.02]",
+            isTwinly
+              ? cn(
+                  dashboardCtaSecondary,
+                  "border border-white/15 bg-black/50 backdrop-blur-md",
+                )
+              : "border border-border bg-card text-foreground hover:border-primary/40",
+          )}
         >
           Daily check-in
         </button>
