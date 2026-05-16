@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { dashboardBody, dashboardMuted } from "@/components/dashboard/dashboard-theme";
 import type { WeatherSnapshot } from "@/services/weatherService";
 import { cn } from "@/lib/utils";
 
@@ -9,14 +10,17 @@ interface WeatherForecastPillsProps {
   weather: WeatherSnapshot;
   forecastDays?: number;
   className?: string;
+  appearance?: "default" | "twinly";
 }
 
 export function WeatherForecastPills({
   weather,
   forecastDays = 7,
   className,
+  appearance = "default",
 }: WeatherForecastPillsProps) {
   const forecast = weather.forecast.slice(0, forecastDays);
+  const isTwinly = appearance === "twinly";
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -32,11 +36,20 @@ export function WeatherForecastPills({
           />
         ) : null}
         <div>
-          <p className="text-sm text-muted-foreground">{weather.location}</p>
-          <p className="mt-1 font-heading text-2xl font-semibold text-primary">
+          <p className={isTwinly ? dashboardMuted : "text-sm text-muted-foreground"}>
+            {weather.location}
+          </p>
+          <p
+            className={cn(
+              "mt-1 text-2xl font-semibold",
+              isTwinly
+                ? "font-poppins font-semibold text-[#57B55D]"
+                : "font-heading text-primary",
+            )}
+          >
             {Math.round(weather.temp_c)}°C now
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className={isTwinly ? dashboardMuted : "text-sm text-muted-foreground"}>
             {weather.condition} · {weather.humidity}% humidity
           </p>
         </div>
@@ -52,12 +65,27 @@ export function WeatherForecastPills({
             return (
               <li
                 key={day.date}
-                className="flex min-w-[7.5rem] shrink-0 flex-col items-center rounded-2xl border border-border bg-[#0D0D0D]/60 px-4 py-4 text-center shadow-sm"
+                className={cn(
+                  "flex min-w-[7.5rem] shrink-0 flex-col items-center rounded-2xl px-4 py-4 text-center shadow-sm",
+                  isTwinly
+                    ? "border border-white/10 bg-black/50 backdrop-blur-sm"
+                    : "border border-border bg-[#0D0D0D]/60",
+                )}
               >
-                <span className="text-xs font-medium text-muted-foreground">
+                <span
+                  className={cn(
+                    "text-xs font-medium",
+                    isTwinly ? "font-poppins text-white/55" : "text-muted-foreground",
+                  )}
+                >
                   {label}
                 </span>
-                <span className="mt-1 text-[10px] text-muted-foreground">
+                <span
+                  className={cn(
+                    "mt-1 text-[10px]",
+                    isTwinly ? "text-white/45" : "text-muted-foreground",
+                  )}
+                >
                   {day.date.slice(5)}
                 </span>
                 {day.condition_icon ? (
@@ -70,13 +98,23 @@ export function WeatherForecastPills({
                     unoptimized
                   />
                 ) : null}
-                <p className="mt-2 min-h-[2.5rem] text-xs leading-snug text-foreground">
+                <p
+                  className={cn(
+                    "mt-2 min-h-[2.5rem] text-xs leading-snug",
+                    isTwinly ? dashboardBody : "text-foreground",
+                  )}
+                >
                   {day.condition}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-foreground">
+                <p
+                  className={cn(
+                    "mt-2 text-sm font-semibold",
+                    isTwinly ? "font-poppins text-white" : "text-foreground",
+                  )}
+                >
                   {day.mintemp_c}–{day.maxtemp_c}°C
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className={cn("mt-1 text-xs", isTwinly ? dashboardMuted : "text-muted-foreground")}>
                   {day.daily_chance_of_rain}% rain
                 </p>
               </li>
