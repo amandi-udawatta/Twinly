@@ -128,4 +128,7 @@
   html {
     @apply font-sans;
   }
+  .font-heading {
+    font-family: var(--font-heading), ui-serif, Georgia, serif;
+  }
 }

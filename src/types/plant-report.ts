@@ -18,6 +18,18 @@ export interface PlantInsight {
   confidence: number;
 }
 
+/** Vertex AI multimodal output before OpenAI narrative pass (PRD §4.4). */
+export interface RawPlantReport {
+  healthScore: number;
+  healthTrend: HealthTrend;
+  insights: PlantInsight[];
+  rawPredictionContext: string;
+  urgencyScore: number;
+  changesSinceLastScan: string;
+  weatherImpactRaw: string;
+}
+
+/** Final report saved to DB and rendered in UI (PRD §4.5). */
 export interface PlantReport {
   healthScore: number;
   healthTrend: HealthTrend;
