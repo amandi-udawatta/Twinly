@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 
+import { lostTumbler, poppins } from "@/lib/fonts";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${instrumentSerif.variable} min-h-screen antialiased`}
+        className={`${inter.variable} ${instrumentSerif.variable} ${lostTumbler.variable} ${poppins.variable} min-h-screen antialiased`}
       >
         {children}
       </body>

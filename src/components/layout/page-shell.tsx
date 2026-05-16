@@ -14,7 +14,7 @@ export async function PageShell({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <main className="mx-auto max-w-6xl px-4 pb-10 pt-24 sm:px-6">
         {(title || description) && (
           <header className="mb-8 space-y-2">
             {title ? (

@@ -39,6 +39,8 @@ function AuthMessages({ state }: { state: AuthActionState }) {
 export function AuthForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "";
+  const defaultTab =
+    searchParams.get("tab") === "signup" ? "signup" : "signin";
 
   const [signInState, signInAction, signInPending] = useActionState(
     signIn,
@@ -58,7 +60,7 @@ export function AuthForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="signin">
+        <Tabs defaultValue={defaultTab} key={defaultTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign in</TabsTrigger>
             <TabsTrigger value="signup">Sign up</TabsTrigger>
