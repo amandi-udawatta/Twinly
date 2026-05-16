@@ -26,8 +26,8 @@ export function GardenSpeciesOverview({ summaries }: GardenSpeciesOverviewProps)
   }
 
   return (
-    <div>
-      <ul className="flex w-max flex-nowrap gap-4 overflow-x-auto pb-2">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch]">
+      <ul className="flex w-max flex-nowrap gap-4 pb-1">
         {summaries.map((item) => (
           <li
             key={item.speciesKey}
