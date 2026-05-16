@@ -17,7 +17,6 @@ import {
   dashboardMuted,
   dashboardPanel,
   dashboardPanelTitle,
-  twinlyInlineCard,
   twinlyLabel,
   twinlyListRow,
   twinlySelect,

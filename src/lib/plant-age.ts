@@ -69,7 +69,7 @@ export interface AgeBreakdown {
 export function breakdownAgeDays(totalDays: number): AgeBreakdown {
   const total = Math.max(0, Math.floor(totalDays));
   const years = Math.floor(total / DAYS_PER_YEAR);
-  let remainder = total % DAYS_PER_YEAR;
+  const remainder = total % DAYS_PER_YEAR;
   const months = Math.floor(remainder / DAYS_PER_MONTH);
   const days = remainder % DAYS_PER_MONTH;
   return { days, months, years };

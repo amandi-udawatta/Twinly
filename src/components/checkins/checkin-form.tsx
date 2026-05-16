@@ -21,12 +21,9 @@ import type { PlantReport } from "@/types/plant-report";
 import { buttonVariants } from "@/components/ui/button";
 import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
 import {
-  dashboardBody,
   dashboardCtaPrimary,
   dashboardMuted,
   dashboardPanel,
-  dashboardPanelTitle,
-  twinlyInlineCard,
   twinlyLabel,
 } from "@/components/dashboard/dashboard-theme";
 import { cn } from "@/lib/utils";
