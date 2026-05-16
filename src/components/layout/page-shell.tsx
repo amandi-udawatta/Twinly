@@ -2,6 +2,7 @@ import {
   dashboardPageDescription,
   dashboardPageTitle,
   dashboardShell,
+  twinlyPageTitlePoppins,
 } from "@/components/dashboard/dashboard-theme";
 import { SiteHeader } from "@/components/layout/site-header";
 import { lostTumbler, poppins } from "@/lib/fonts";
@@ -13,6 +14,8 @@ interface PageShellProps {
   description?: string;
   /** Matches landing page dark glass aesthetic (dashboard). */
   variant?: "default" | "twinly";
+  /** When twinly: Lost Tumbler (display) or Poppins for page title. */
+  titleFont?: "display" | "poppins";
 }
 
 export async function PageShell({
@@ -20,6 +23,7 @@ export async function PageShell({
   title,
   description,
   variant = "default",
+  titleFont = "display",
 }: PageShellProps) {
   const isTwinly = variant === "twinly";
 
@@ -39,7 +43,9 @@ export async function PageShell({
               <h1
                 className={
                   isTwinly
-                    ? dashboardPageTitle
+                    ? titleFont === "poppins"
+                      ? twinlyPageTitlePoppins
+                      : dashboardPageTitle
                     : "font-heading text-3xl font-semibold tracking-tight"
                 }
               >
