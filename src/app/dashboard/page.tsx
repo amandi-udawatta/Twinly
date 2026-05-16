@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { DashboardPanel } from "@/components/dashboard/dashboard-panel";
 import { EnvironmentalInsightsPanel } from "@/components/dashboard/environmental-insights-panel";
 import { GardenSpeciesOverview } from "@/components/dashboard/garden-species-overview";
 import { WeatherSummaryPanel } from "@/components/dashboard/weather-summary-panel";
@@ -25,23 +26,25 @@ export default async function DashboardPage() {
 
   return (
     <PageShell
+      variant="twinly"
       title="Dashboard"
       description="Garden-wide health trends, weather, and environmental context."
     >
-      <LocationWeatherBanner show={!weatherContext.locationCity} />
+      <LocationWeatherBanner
+        show={!weatherContext.locationCity}
+        variant="twinly"
+      />
       <div className="grid gap-6 lg:grid-cols-3">
-        <section className="rounded-xl border border-border bg-card p-6 lg:col-span-2">
-          <h2 className="font-heading text-lg font-semibold">
-            Your garden this week
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            One snapshot per species — tap a card to open a plant.
-          </p>
-          <div className="mt-6">
-            <GardenSpeciesOverview summaries={speciesSummaries} />
-          </div>
-        </section>
+        <DashboardPanel
+          title="Your garden this week"
+          description="One snapshot per species — tap a card to open a plant."
+          className="lg:col-span-2"
+          contentClassName="mt-6"
+        >
+          <GardenSpeciesOverview summaries={speciesSummaries} />
+        </DashboardPanel>
         <WeatherSummaryPanel
+          appearance="twinly"
           weather={weatherContext.weather}
           error={weatherContext.error}
           forecastDays={7}
