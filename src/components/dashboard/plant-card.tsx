@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import {
+  dashboardCard,
+  dashboardHealthTone,
+  dashboardMuted,
+} from "@/components/dashboard/dashboard-theme";
 import type { PlantWithLatestAnalysis } from "@/lib/data/plants";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -30,12 +35,74 @@ function daysSince(iso: string | null): string {
 
 interface PlantCardProps {
   plant: PlantWithLatestAnalysis;
+  appearance?: "default" | "twinly";
 }
 
-export function PlantCard({ plant }: PlantCardProps) {
+export function PlantCard({ plant, appearance = "default" }: PlantCardProps) {
   const name = plant.nickname || plant.species || "Unnamed plant";
   const score = plant.latest_health_score;
   const urgent = (plant.latest_urgency_score ?? 0) > 7;
+  const isTwinly = appearance === "twinly";
+
+  if (isTwinly) {
+    return (
+      <Link href={`/plants/${plant.id}`} className="group block h-full">
+        <article
+          className={cn(
+            dashboardCard,
+            "h-full transition-colors hover:border-[#57B55D]/40",
+          )}
+        >
+          <div className="relative aspect-[4/3] bg-black/50">
+            {plant.image_url ? (
+              <Image
+                src={plant.image_url}
+                alt={name}
+                fill
+                className="object-cover transition-transform group-hover:scale-[1.02]"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            ) : (
+              <div
+                className={cn(
+                  dashboardMuted,
+                  "flex h-full items-center justify-center text-sm",
+                )}
+              >
+                No photo
+              </div>
+            )}
+            {urgent ? (
+              <span className="absolute right-2 top-2 rounded-full bg-red-500/90 px-2.5 py-0.5 font-poppins text-xs font-medium text-white">
+                Needs attention
+              </span>
+            ) : null}
+          </div>
+          <div className="space-y-1 p-4">
+            <h3 className="font-poppins text-lg font-semibold text-white transition-colors group-hover:text-[#57B55D]">
+              {name}
+            </h3>
+            <p className={dashboardMuted}>
+              {plant.species ?? "Species unknown"}
+            </p>
+            <div className="flex items-center justify-between pt-2 text-sm">
+              <span
+                className={cn(
+                  "font-poppins font-semibold",
+                  dashboardHealthTone(score),
+                )}
+              >
+                {score !== null ? `Health ${score}` : "No score yet"}
+              </span>
+              <span className={dashboardMuted}>
+                {daysSince(plant.last_checkin_at)}
+              </span>
+            </div>
+          </div>
+        </article>
+      </Link>
+    );
+  }
 
   return (
     <Link href={`/plants/${plant.id}`} className="group block h-full">
@@ -55,10 +122,7 @@ export function PlantCard({ plant }: PlantCardProps) {
             </div>
           )}
           {urgent ? (
-            <Badge
-              variant="destructive"
-              className="absolute right-2 top-2"
-            >
+            <Badge variant="destructive" className="absolute right-2 top-2">
               Needs attention
             </Badge>
           ) : null}

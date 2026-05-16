@@ -29,6 +29,24 @@ export const dashboardLink =
 export const dashboardCard =
   "overflow-hidden rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm";
 
+export const dashboardEmptyPanel =
+  "flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-black/30 py-16 text-center backdrop-blur-md";
+
+export const dashboardCtaPrimary =
+  "inline-flex rounded-full bg-[#6B8F5C] px-6 py-2.5 font-poppins text-sm font-medium text-white shadow-md transition-all hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]";
+
+export const dashboardCtaSecondary =
+  "inline-flex rounded-full bg-[#9CA3AF] px-6 py-2.5 font-poppins text-sm font-medium text-white shadow-md transition-all hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]";
+
+export const dashboardInput =
+  "border-white/15 bg-black/40 text-white placeholder:text-white/40 focus-visible:border-[#57B55D]/50 focus-visible:ring-[#57B55D]/25";
+
+export const dashboardFilterActive =
+  "border-[#57B55D] bg-[#57B55D]/15 text-[#57B55D]";
+
+export const dashboardFilterIdle =
+  "border-white/20 text-white/60 hover:border-[#57B55D]/40 hover:text-white/90";
+
 export const dashboardHealthGood = "text-[#57B55D]";
 export const dashboardHealthMid = "text-amber-400";
 export const dashboardHealthBad = "text-red-400";
