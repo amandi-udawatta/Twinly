@@ -141,7 +141,7 @@ export function RegisterPlantWizard() {
             </select>
           </div>
           <p className="text-xs text-muted-foreground">
-            Optional. Stored as days so ages stay consistent.
+            Optional. Age increases by one day for each day since registration.
           </p>
         </div>
         <div className="space-y-2">

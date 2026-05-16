@@ -1,6 +1,5 @@
 import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
 import {
-  dashboardBody,
   dashboardLink,
   dashboardMuted,
   twinlyInlineCard,
