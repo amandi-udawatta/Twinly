@@ -19,6 +19,7 @@ import {
 } from "@/components/dashboard/dashboard-theme";
 import { PlantGallery } from "@/components/plants/plant-gallery";
 import { PlantFloatingCheckin } from "@/components/plants/plant-floating-checkin";
+import { PlantSettingsMenu } from "@/components/plants/plant-settings-menu";
 import { PlantPageTabs } from "@/components/plants/plant-page-tabs";
 import { QrDisplay } from "@/components/plants/qr-display";
 import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
@@ -160,12 +161,21 @@ export default async function PlantPage({ params }: PlantPageProps) {
             ) : null}
           </div>
         </div>
-        <div className="flex flex-col items-center sm:items-end">
+        <div className="flex flex-col items-center gap-3 sm:items-end">
           {latestAnalysis ? (
             <HealthScoreRing score={latestAnalysis.health_score} appearance="twinly" />
           ) : (
             <p className={cn("font-poppins text-sm", dashboardMuted)}>No health score yet</p>
           )}
+          <PlantSettingsMenu
+            plant={{
+              id: plant.id,
+              nickname: plant.nickname,
+              image_url: plant.image_url,
+            }}
+            displayName={displayName}
+            checkinCount={checkins.length}
+          />
         </div>
       </div>
 
