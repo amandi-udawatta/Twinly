@@ -6,14 +6,18 @@ import { PlantsGrid } from "@/components/plants/plants-grid";
 import { PageShell } from "@/components/layout/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getPlantsForUser } from "@/lib/data/plants";
+import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
+import { getPlantsForUser, getUserLocationCity } from "@/lib/data/plants";
 import { getSessionUser } from "@/lib/auth/get-user";
 
 export default async function PlantsPage() {
   const user = await getSessionUser();
   if (!user) redirect("/auth");
 
-  const plants = await getPlantsForUser(user.id);
+  const [plants, locationCity] = await Promise.all([
+    getPlantsForUser(user.id),
+    getUserLocationCity(user.id),
+  ]);
 
   const sorted = [...plants].sort((a, b) => {
     const ua = a.latest_urgency_score ?? 0;
@@ -31,6 +35,8 @@ export default async function PlantsPage() {
       title="My Plants"
       description="Your garden at a glance — search, filter, and open any plant."
     >
+      <LocationWeatherBanner show={!locationCity} />
+
       {needsAttention ? (
         <p
           role="status"

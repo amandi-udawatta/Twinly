@@ -56,3 +56,17 @@ export const rawPlantReportResponseSchema: Schema = {
     "weatherImpactRaw",
   ],
 };
+
+/** Before/after photo comparison (gallery feature). */
+export const photoComparisonResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    summary: { type: Type.STRING },
+    visibleChanges: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+    },
+    healthDelta: { type: Type.STRING },
+  },
+  required: ["summary", "visibleChanges", "healthDelta"],
+};

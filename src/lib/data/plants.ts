@@ -3,6 +3,10 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  fetchWeatherForCity,
+  type WeatherSnapshot,
+} from "@/services/weatherService";
 import type { PlantInsight } from "@/types/plant-report";
 
 export interface PlantWithLatestAnalysis {
@@ -122,8 +126,121 @@ export function parseInsights(raw: unknown): PlantInsight[] {
 }
 
 export interface GardenHealthPoint {
+  id: string;
   date: string;
   score: number;
+}
+
+export interface SpeciesGardenSummary {
+  speciesKey: string;
+  species: string;
+  plantCount: number;
+  imageUrl: string | null;
+  avgHealthThisWeek: number | null;
+  checkinsThisWeek: number;
+  summary: string;
+  primaryPlantId: string;
+}
+
+/** One card per species: image, weekly check-ins, and short summary. */
+export async function getGardenSpeciesSummaries(
+  userId: string,
+): Promise<SpeciesGardenSummary[]> {
+  const plants = await getPlantsForUser(userId);
+  if (!plants.length) return [];
+
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const plantIds = plants.map((p) => p.id);
+  const supabase = await createClient();
+
+  const { data: analyses, error: analysesError } = await supabase
+    .from("analysis_results")
+    .select("plant_id, health_score, health_trend, changes_summary, created_at")
+    .in("plant_id", plantIds)
+    .gte("created_at", weekAgo.toISOString())
+    .order("created_at", { ascending: false });
+
+  if (analysesError) throw new Error(analysesError.message);
+
+  const { data: checkins } = await supabase
+    .from("checkins")
+    .select("plant_id, photo_urls")
+    .in("plant_id", plantIds)
+    .order("created_at", { ascending: false });
+
+  const photoByPlant = new Map<string, string>();
+  for (const row of checkins ?? []) {
+    if (!photoByPlant.has(row.plant_id) && row.photo_urls?.[0]) {
+      photoByPlant.set(row.plant_id, row.photo_urls[0]);
+    }
+  }
+
+  const bySpecies = new Map<string, PlantWithLatestAnalysis[]>();
+  for (const plant of plants) {
+    const key = plant.species?.trim().toLowerCase() || "unknown";
+    const group = bySpecies.get(key) ?? [];
+    group.push(plant);
+    bySpecies.set(key, group);
+  }
+
+  return Array.from(bySpecies.entries())
+    .map(([speciesKey, group]) => {
+      const displaySpecies =
+        group[0].species?.trim() || "Unknown species";
+      const groupIds = new Set(group.map((p) => p.id));
+      const weekAnalyses = (analyses ?? []).filter((row) =>
+        groupIds.has(row.plant_id),
+      );
+
+      const imageUrl =
+        group.find((p) => p.image_url)?.image_url ??
+        group.map((p) => photoByPlant.get(p.id)).find(Boolean) ??
+        null;
+
+      const scores = weekAnalyses.map((row) => row.health_score);
+      const avgHealth =
+        scores.length > 0
+          ? Math.round(
+              scores.reduce((sum, value) => sum + value, 0) / scores.length,
+            )
+          : null;
+
+      const latest = weekAnalyses[0];
+      const plantLabel =
+        group.length === 1 ? "plant" : "plants";
+      let summary: string;
+
+      if (weekAnalyses.length === 0) {
+        summary = `No check-ins this week across ${group.length} ${displaySpecies} ${plantLabel}.`;
+      } else {
+        const parts: string[] = [];
+        if (avgHealth !== null) {
+          parts.push(`Average health ${avgHealth} across ${weekAnalyses.length} check-in${weekAnalyses.length === 1 ? "" : "s"}.`);
+        }
+        if (latest?.health_trend) {
+          parts.push(`Latest trend: ${latest.health_trend}.`);
+        }
+        const change = latest?.changes_summary?.trim();
+        if (change) {
+          parts.push(change);
+        }
+        summary = parts.join(" ");
+      }
+
+      return {
+        speciesKey,
+        species: displaySpecies,
+        plantCount: group.length,
+        imageUrl,
+        avgHealthThisWeek: avgHealth,
+        checkinsThisWeek: weekAnalyses.length,
+        summary,
+        primaryPlantId: group[0].id,
+      };
+    })
+    .sort((a, b) => a.species.localeCompare(b.species));
 }
 
 /** Average garden health score per check-in day (all plants). */
@@ -159,6 +276,7 @@ export async function getGardenHealthTimeline(
 
   return Array.from(byDate.entries())
     .map(([date, scores]) => ({
+      id: `garden-${date}`,
       date,
       score: Math.round(
         scores.reduce((sum, value) => sum + value, 0) / scores.length,
@@ -168,9 +286,11 @@ export async function getGardenHealthTimeline(
 }
 
 export interface EnvironmentalInsight {
+  id: string;
   plantName: string;
   text: string;
-  date: string;
+  /** ISO timestamp for display and uniqueness across same-day check-ins. */
+  createdAt: string;
 }
 
 /** Recent weather-impact notes across the garden for the dashboard. */
@@ -197,7 +317,7 @@ export async function getRecentEnvironmentalInsights(
 
   const { data: results, error } = await supabase
     .from("analysis_results")
-    .select("plant_id, weather_impact, created_at")
+    .select("id, plant_id, weather_impact, created_at")
     .in("plant_id", plantIds)
     .not("weather_impact", "is", null)
     .order("created_at", { ascending: false })
@@ -208,9 +328,10 @@ export async function getRecentEnvironmentalInsights(
   return (results ?? [])
     .filter((row) => row.weather_impact?.trim())
     .map((row) => ({
+      id: row.id,
       plantName: nameById.get(row.plant_id) ?? "Plant",
       text: row.weather_impact as string,
-      date: row.created_at.slice(0, 10),
+      createdAt: row.created_at,
     }));
 }
 
@@ -225,6 +346,33 @@ export async function getUserLocationCity(
     .single();
 
   return data?.location_city ?? null;
+}
+
+export interface UserWeatherContext {
+  locationCity: string | null;
+  weather: WeatherSnapshot | null;
+  error: string | null;
+}
+
+/** Live WeatherAPI data for the signed-in user's saved city. */
+export async function getUserWeatherContext(
+  userId: string,
+): Promise<UserWeatherContext> {
+  const locationCity = await getUserLocationCity(userId);
+  if (!locationCity) {
+    return { locationCity: null, weather: null, error: null };
+  }
+
+  try {
+    const weather = await fetchWeatherForCity(locationCity);
+    return { locationCity, weather, error: null };
+  } catch (err) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Weather data is unavailable right now.";
+    return { locationCity, weather: null, error: message };
+  }
 }
 
 export async function getCheckInHistorySummaries(

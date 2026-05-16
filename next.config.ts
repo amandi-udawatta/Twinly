@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "cyvoxtijyntxixeyghnm.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.weatherapi.com",
+        pathname: "/weather/**",
+      },
     ],
   },
 };

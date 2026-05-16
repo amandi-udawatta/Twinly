@@ -100,7 +100,10 @@ supabase/migrations/   # SQL migrations (source of truth for remote DB)
 | `/scan/[id]` | QR → redirects to check-in |
 | `/api/register-plant` | Gemini registration auto-fill |
 | `/api/analyze` | Check-in analysis |
+| `/api/compare-photos` | Vertex before/after photo compare |
 | `/api/weather` | Weather proxy |
+| `/dashboard` | Garden health + weather |
+| `/settings` | Location city for weather |
 
 ## Scripts
 
@@ -117,3 +120,43 @@ Remote Postgres tables: `users`, `plants`, `checkins`, `analysis_results`, `inte
 Storage bucket: `plant-photos` (public).
 
 Regenerate TypeScript types after schema changes (via Supabase MCP `generate_typescript_types`).
+
+## Architecture (for judges)
+
+Twinly’s **digital twin memory** runs on **Gemini 2.5 Flash via Vertex AI** (GCP project + service account). **OpenAI (gpt-4o-mini)** only polishes Gemini’s structured output into gardener-friendly copy—it never receives images.
+
+```mermaid
+flowchart LR
+  subgraph registration [Registration optional]
+    Photo1[Plant photo] --> VertexReg[Vertex gemini-2.5-flash]
+    VertexReg --> SpeciesJSON[Species name JSON]
+  end
+
+  subgraph checkin [Daily check-in flagship]
+    Photos[1-4 photos] --> VertexCheck[Vertex 5-layer prompt]
+    History[30d history text] --> VertexCheck
+    Weather[WeatherAPI text] --> VertexCheck
+    Profile[Plant profile] --> VertexCheck
+    VertexCheck --> RawReport[RawPlantReport JSON]
+    RawReport --> OpenAI[OpenAI gpt-4o-mini]
+    OpenAI --> FinalReport[PlantReport]
+    FinalReport --> DB[(Supabase)]
+  end
+
+  subgraph compare [Gallery compare]
+    TwoPhotos[Two check-in photos] --> VertexCompare[Vertex compare]
+    VertexCompare --> CompareJSON[summary + visibleChanges]
+  end
+```
+
+| Capability | Engine | Route / entry |
+|------------|--------|----------------|
+| Species suggest (registration) | Vertex | `POST /api/register-plant` |
+| Check-in analysis (5 layers) | Vertex → OpenAI | `POST /api/analyze` |
+| Photo before/after compare | Vertex only | `POST /api/compare-photos` |
+| Live 7-day forecast | WeatherAPI | Dashboard + plant Predictions tab |
+| Weather at check-in | WeatherAPI snapshot | `checkins.weather_snapshot` |
+
+**Key files:** `src/services/geminiService/`, `src/app/api/analyze/route.ts`, `src/app/api/compare-photos/route.ts`
+
+**Demo script:** see [DEMO.md](./DEMO.md) for a 2-minute walkthrough to record for submission.
