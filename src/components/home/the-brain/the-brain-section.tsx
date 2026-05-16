@@ -2,13 +2,8 @@
 
 import { useState } from "react";
 
-import {
-  LANDING_SECTION_CONTENT,
-  LANDING_SECTION_SHELL,
-} from "@/components/home/landing-layout";
-import { ScrollReveal } from "@/components/home/scroll-reveal";
-import { BrainDiagram } from "@/components/home/the-brain/brain-diagram";
-import { THE_BRAIN_BACKGROUND, THE_BRAIN_BODY } from "@/components/home/the-brain/data";
+import { BrainTimeline } from "@/components/home/the-brain/brain-timeline";
+import { THE_BRAIN_BODY } from "@/components/home/the-brain/data";
 import { lostTumbler, poppins } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
@@ -20,20 +15,13 @@ export function TheBrainSection() {
       className={cn(
         lostTumbler.variable,
         poppins.variable,
-        LANDING_SECTION_SHELL,
-        "bg-cover bg-center",
+        "relative flex min-h-screen items-center overflow-x-hidden bg-[url('/the-brain/herobackground.png')] bg-cover bg-center",
       )}
-      style={{ backgroundImage: `url('${THE_BRAIN_BACKGROUND}')` }}
       aria-labelledby="the-brain-heading"
     >
-      <ScrollReveal
-        className={cn(
-          LANDING_SECTION_CONTENT,
-          "grid max-w-[1280px] grid-cols-1 items-center gap-10 lg:grid-cols-[3fr_2fr] lg:gap-10 xl:gap-14",
-        )}
-      >
-        <div className="w-full min-w-0 overflow-visible">
-          <BrainDiagram pulseToken={pulseToken} />
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-8 py-20 lg:grid-cols-2">
+        <div className="w-full min-w-0 overflow-visible pr-4 sm:pr-8">
+          <BrainTimeline pulseToken={pulseToken} />
         </div>
 
         <div className="flex flex-col items-start justify-center gap-6 lg:items-end lg:text-right">
@@ -61,7 +49,7 @@ export function TheBrainSection() {
             Click the Paths
           </button>
         </div>
-      </ScrollReveal>
+      </div>
     </section>
   );
 }

@@ -181,18 +181,18 @@ function CarouselNavButton({
     <motion.button
       type="button"
       onClick={onClick}
-      className="absolute bottom-0 right-0 flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white shadow-[0_6px_20px_rgba(0,0,0,0.25)] transition-transform hover:scale-105 active:scale-95 sm:h-14 sm:w-14"
+      className="absolute bottom-4 right-0 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out hover:scale-110 hover:bg-white/30 hover:shadow-xl md:-right-8"
       aria-label={
         isLastPage ? "Previous plant parent cards" : "Next plant parent cards"
       }
-      whileTap={{ scale: 0.94 }}
+      whileTap={{ scale: 1 }}
     >
       <Image
         src={iconSrc}
         alt=""
-        width={28}
-        height={28}
-        className="h-6 w-6 sm:h-7 sm:w-7"
+        width={24}
+        height={24}
+        className="h-6 w-6 object-contain"
       />
     </motion.button>
   );

@@ -3,30 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import { UserMenu } from "@/components/layout/user-menu";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/plants", label: "My Plants" },
+const navLinks = [
+  { name: "HOME", href: "/" },
+  { name: "DASHBOARD", href: "/dashboard" },
+  { name: "MY PLANTS", href: "/plants" },
 ] as const;
+
+function isNavLinkActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 interface SiteHeaderNavProps {
   className?: string;
   isAuthenticated: boolean;
   profileHref: string;
-}
-
-function getActiveIndex(pathname: string) {
-  const index = NAV_LINKS.findIndex(({ href }) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(`${href}/`),
-  );
-  return index === -1 ? 0 : index;
 }
 
 export function SiteHeaderNav({
@@ -35,83 +30,55 @@ export function SiteHeaderNav({
   profileHref,
 }: SiteHeaderNavProps) {
   const pathname = usePathname();
-  const activeIndex = getActiveIndex(pathname);
-  const listRef = useRef<HTMLUListElement>(null);
-  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-
-  const updateIndicator = useCallback(() => {
-    const list = listRef.current;
-    const link = linkRefs.current[activeIndex];
-    if (!list || !link) return;
-
-    setIndicator({
-      left: link.offsetLeft,
-      width: link.offsetWidth,
-    });
-  }, [activeIndex]);
-
-  useLayoutEffect(() => {
-    updateIndicator();
-  }, [updateIndicator, pathname]);
-
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-
-    const observer = new ResizeObserver(() => updateIndicator());
-    observer.observe(list);
-    window.addEventListener("resize", updateIndicator);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateIndicator);
-    };
-  }, [updateIndicator]);
 
   return (
     <nav
       className={cn(
-        "animate-hero-nav-in mx-auto flex w-full max-w-4xl items-center justify-between gap-2 rounded-full border border-white/25 bg-white/[0.08] px-3 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl backdrop-saturate-150 sm:gap-4 sm:px-6 sm:py-2.5",
+        "animate-hero-nav-in relative flex h-full w-full items-center",
         className,
       )}
       aria-label="Main"
     >
-      <ul
-        ref={listRef}
-        className="relative flex flex-1 items-center justify-center gap-3 sm:gap-6 md:gap-10"
+      <Link
+        href="/"
+        className="absolute left-0 top-1/2 shrink-0 -translate-y-1/2 transition-opacity duration-300 hover:opacity-80"
+        aria-label="Twinly home"
       >
-        {NAV_LINKS.map(({ href, label }, index) => {
-          const isActive = index === activeIndex;
+        <Image
+          src="/hero/lg.png"
+          alt="Twinly Logo"
+          width={40}
+          height={40}
+          className="object-contain"
+          priority
+        />
+      </Link>
+
+      <ul className="relative mx-auto flex items-center justify-center gap-6 sm:gap-8 md:gap-10">
+        {navLinks.map((link) => {
+          const isActive = isNavLinkActive(pathname, link.href);
 
           return (
-            <li key={href}>
+            <li key={link.href}>
               <Link
-                ref={(el) => {
-                  linkRefs.current[index] = el;
-                }}
-                href={href}
+                href={link.href}
                 className={cn(
-                  "font-lost-tumbler relative block pb-1 text-xs uppercase tracking-[0.1em] transition-colors duration-300 sm:text-sm md:text-base",
-                  isActive ? "text-white" : "text-white/75 hover:text-white/95",
+                  "relative font-lost-tumbler text-xs font-bold uppercase tracking-wide transition-colors duration-300 ease-in-out sm:text-sm md:text-base",
+                  "text-white/90 hover:text-[#4ADE80]",
+                  "after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-full after:bg-[#4ADE80] after:transition-transform after:duration-300 after:content-['']",
+                  isActive
+                    ? "text-[#4ADE80] after:origin-bottom-left after:scale-x-100"
+                    : "after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100",
                 )}
               >
-                {label}
+                {link.name}
               </Link>
             </li>
           );
         })}
-
-        <span
-          className="pointer-events-none absolute bottom-0 h-[3px] rounded-full bg-[#57B55D] transition-[left,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          style={{
-            left: indicator.left,
-            width: indicator.width,
-          }}
-          aria-hidden
-        />
       </ul>
 
-      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div className="absolute right-0 top-1/2 flex shrink-0 -translate-y-1/2 items-center gap-1.5 sm:gap-2">
         {isAuthenticated ? (
           <UserMenu variant="hero" />
         ) : (

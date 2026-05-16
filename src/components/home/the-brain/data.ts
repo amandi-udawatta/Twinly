@@ -8,6 +8,32 @@ export const THE_BRAIN_ASSETS = {
   mascot3: `${THE_BRAIN_BASE}/b3.png`,
 } as const;
 
+export const THE_BRAIN_ROBOT = `${THE_BRAIN_BASE}/b4.png`;
+
+export const BRAIN_TIMELINE_STEPS = [
+  {
+    id: 1,
+    title: "Snap & Auto-Fill",
+    description:
+      "Just upload a photo. Twinly's vision engine instantly recognizes the species and auto-fills a custom profile.",
+    mascotKey: "mascot1" as const,
+  },
+  {
+    id: 2,
+    title: "Longitudinal AI Memory",
+    description:
+      "Twinly remembers your plant's journey and combines past data with local weather to predict exactly what it needs next",
+    mascotKey: "mascot2" as const,
+  },
+  {
+    id: 3,
+    title: "Daily Check-Ins via QR",
+    description:
+      "Stick a unique QR code on your pot. Scan it, snap a few angles, and log any quick notes.",
+    mascotKey: "mascot3" as const,
+  },
+] as const;
+
 export const THE_BRAIN_BODY =
   "No complicated charts, no guesswork. Just snap a photo, stick a cute QR sticker on your pot, and let Twinly's intelligence engine do the remembering. We learn your plant's unique story and whisper exactly what it needs next, right when it needs it.";
 
