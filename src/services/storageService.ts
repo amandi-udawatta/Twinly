@@ -65,3 +65,46 @@ export async function uploadPlantPhotos(
   }
   return urls;
 }
+
+/** Remove all objects under {userId}/{plantId}/ (cover + check-in photos). */
+export async function deleteAllPlantStorage(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  plantId: string,
+): Promise<void> {
+  const prefix = `${userId}/${plantId}`;
+  const paths: string[] = [];
+  let offset = 0;
+  const limit = 100;
+
+  for (;;) {
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .list(prefix, { limit, offset });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data?.length) break;
+
+    for (const item of data) {
+      if (item.name) {
+        paths.push(`${prefix}/${item.name}`);
+      }
+    }
+
+    if (data.length < limit) break;
+    offset += limit;
+  }
+
+  if (paths.length === 0) return;
+
+  const { error: removeError } = await supabase.storage
+    .from(BUCKET)
+    .remove(paths);
+
+  if (removeError) {
+    throw new Error(removeError.message);
+  }
+}

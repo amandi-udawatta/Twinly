@@ -10,6 +10,7 @@ import { InterventionsPanel } from "@/components/plants/interventions-panel";
 import { PhotoComparePanel } from "@/components/plants/photo-compare-panel";
 import { PlantGallery } from "@/components/plants/plant-gallery";
 import { PlantFloatingCheckin } from "@/components/plants/plant-floating-checkin";
+import { PlantSettingsMenu } from "@/components/plants/plant-settings-menu";
 import { QrDisplay } from "@/components/plants/qr-display";
 import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
 import { PageShell } from "@/components/layout/page-shell";
@@ -144,12 +145,21 @@ export default async function PlantPage({ params }: PlantPageProps) {
             ) : null}
           </div>
         </div>
-        <div className="flex flex-col items-center sm:items-end">
+        <div className="flex flex-col items-center gap-3 sm:items-end">
           {latestAnalysis ? (
             <HealthScoreRing score={latestAnalysis.health_score} />
           ) : (
             <p className="text-sm text-muted-foreground">No health score yet</p>
           )}
+          <PlantSettingsMenu
+            plant={{
+              id: plant.id,
+              nickname: plant.nickname,
+              image_url: plant.image_url,
+            }}
+            displayName={displayName}
+            checkinCount={checkins.length}
+          />
         </div>
       </div>
 

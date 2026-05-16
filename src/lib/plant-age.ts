@@ -45,3 +45,23 @@ export function formatAgeDays(days: number | null): string | null {
 
   return days === 1 ? "1 day" : `${days} days`;
 }
+
+/** Best-effort amount + unit for edit forms from stored days. */
+export function daysToAgeFormValues(days: number | null): {
+  amount: string;
+  unit: AgeUnit;
+} {
+  if (days == null || days <= 0) {
+    return { amount: "", unit: "weeks" };
+  }
+
+  if (days >= DAYS_PER_YEAR && days % DAYS_PER_YEAR === 0) {
+    return { amount: String(days / DAYS_PER_YEAR), unit: "years" };
+  }
+
+  if (days >= DAYS_PER_WEEK && days % DAYS_PER_WEEK === 0) {
+    return { amount: String(days / DAYS_PER_WEEK), unit: "weeks" };
+  }
+
+  return { amount: String(days), unit: "days" };
+}
