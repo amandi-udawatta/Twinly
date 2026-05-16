@@ -3,24 +3,32 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
+import { dashboardMuted, twinlyInlineCard } from "@/components/dashboard/dashboard-theme";
 import type { AnalysisContext } from "@/types/analysis-context";
 import { cn } from "@/lib/utils";
 
 interface AnalysisContextPanelProps {
   context: AnalysisContext;
   className?: string;
+  appearance?: AppAppearance;
 }
 
 export function AnalysisContextPanel({
   context,
   className,
+  appearance = "default",
 }: AnalysisContextPanelProps) {
   const [open, setOpen] = useState(false);
+  const isTwinly = appearance === "twinly";
 
   return (
     <section
       className={cn(
-        "rounded-lg border border-border bg-card text-sm",
+        "font-poppins text-sm",
+        isTwinly
+          ? twinlyInlineCard
+          : "rounded-lg border border-border bg-card",
         className,
       )}
     >
@@ -32,7 +40,12 @@ export function AnalysisContextPanel({
       >
         <span>
           <span className="font-medium">How Twinly analyzed this</span>
-          <span className="mt-0.5 block text-xs text-muted-foreground">
+          <span
+            className={cn(
+              "mt-0.5 block font-poppins text-xs",
+              isTwinly ? dashboardMuted : "text-muted-foreground",
+            )}
+          >
             Powered by Gemini 2.5 Flash on Google Cloud Vertex AI
           </span>
         </span>
@@ -45,9 +58,19 @@ export function AnalysisContextPanel({
         />
       </button>
       {open ? (
-        <div className="space-y-3 border-t border-border px-4 py-3 text-muted-foreground">
+        <div
+          className={cn(
+            "space-y-3 border-t px-4 py-3 font-poppins",
+            isTwinly ? "border-white/10 text-white/75" : "border-border text-muted-foreground",
+          )}
+        >
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-foreground">
+            <p
+              className={cn(
+                "text-xs font-medium uppercase tracking-wide",
+                isTwinly ? "text-[#57B55D]" : "text-foreground",
+              )}
+            >
               Plant identity
             </p>
             <p className="mt-1 leading-relaxed">{context.plantIdentity}</p>

@@ -6,12 +6,14 @@
 
 import { useEffect, useState } from "react";
 
+import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
 import { cn } from "@/lib/utils";
 
 interface HealthScoreRingProps {
   score: number;
   size?: number;
   className?: string;
+  appearance?: AppAppearance;
 }
 
 function scoreColor(score: number): string {
@@ -24,7 +26,9 @@ export function HealthScoreRing({
   score,
   size = 120,
   className,
+  appearance = "default",
 }: HealthScoreRingProps) {
+  const isTwinly = appearance === "twinly";
   const [animated, setAnimated] = useState(0);
   const stroke = 8;
   const radius = (size - stroke) / 2;
@@ -47,7 +51,7 @@ export function HealthScoreRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={stroke}
-          className="text-muted/30"
+          className={isTwinly ? "text-white/15" : "text-muted/30"}
         />
         <circle
           cx={size / 2}
@@ -63,7 +67,10 @@ export function HealthScoreRing({
         />
       </svg>
       <span
-        className="absolute inset-0 flex items-center justify-center font-heading text-2xl font-semibold"
+        className={cn(
+          "absolute inset-0 flex items-center justify-center text-2xl font-semibold",
+          isTwinly ? "font-poppins" : "font-heading",
+        )}
         style={{ color: scoreColor(clamped) }}
       >
         {Math.round(clamped)}

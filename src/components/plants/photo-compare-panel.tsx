@@ -6,6 +6,17 @@ import { ErrorBanner, LoadingState } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { PhotoComparisonResult } from "@/types/photo-comparison";
+import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
+import {
+  dashboardBody,
+  dashboardCtaPrimary,
+  dashboardMuted,
+  dashboardPanel,
+  dashboardPanelTitle,
+  twinlyInlineCard,
+  twinlyLabel,
+  twinlySelect,
+} from "@/components/dashboard/dashboard-theme";
 import { cn } from "@/lib/utils";
 
 export interface CheckinOption {
@@ -16,6 +27,7 @@ export interface CheckinOption {
 interface PhotoComparePanelProps {
   plantId: string;
   checkins: CheckinOption[];
+  appearance?: AppAppearance;
 }
 
 const DELTA_LABEL: Record<PhotoComparisonResult["healthDelta"], string> = {
@@ -32,7 +44,12 @@ const DELTA_STYLE: Record<PhotoComparisonResult["healthDelta"], string> = {
   unclear: "text-amber-500",
 };
 
-export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps) {
+export function PhotoComparePanel({
+  plantId,
+  checkins,
+  appearance = "default",
+}: PhotoComparePanelProps) {
+  const isTwinly = appearance === "twinly";
   const [beforeId, setBeforeId] = useState(checkins.length > 1 ? checkins[1].id : "");
   const [afterId, setAfterId] = useState(checkins[0]?.id ?? "");
   const [loading, setLoading] = useState(false);
@@ -41,7 +58,12 @@ export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps)
 
   if (checkins.length < 2) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p
+        className={cn(
+          "font-poppins text-sm",
+          isTwinly ? dashboardMuted : "text-muted-foreground",
+        )}
+      >
         Complete at least two check-ins with photos to compare growth over time.
       </p>
     );
@@ -86,21 +108,46 @@ export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps)
   };
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4">
-      <h3 className="font-medium">Compare check-ins</h3>
-      <p className="mt-1 text-sm text-muted-foreground">
+    <section
+      className={
+        isTwinly
+          ? dashboardPanel
+          : "rounded-xl border border-border bg-card p-4"
+      }
+    >
+      <h3
+        className={
+          isTwinly
+            ? cn(dashboardPanelTitle, "text-base sm:text-lg")
+            : "font-medium"
+        }
+      >
+        Compare check-ins
+      </h3>
+      <p
+        className={cn(
+          "mt-1 font-poppins text-sm",
+          isTwinly ? dashboardMuted : "text-muted-foreground",
+        )}
+      >
         Gemini on Vertex AI compares two photos from different visits.
       </p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="before-checkin">Earlier</Label>
+          <Label htmlFor="before-checkin" className={isTwinly ? twinlyLabel : undefined}>
+            Earlier
+          </Label>
           <select
             id="before-checkin"
             value={beforeId}
             onChange={(e) => setBeforeId(e.target.value)}
             disabled={loading}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className={
+              isTwinly
+                ? twinlySelect
+                : "w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            }
           >
             {checkins.map((c) => (
               <option key={c.id} value={c.id}>
@@ -110,13 +157,19 @@ export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps)
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="after-checkin">Later</Label>
+          <Label htmlFor="after-checkin" className={isTwinly ? twinlyLabel : undefined}>
+            Later
+          </Label>
           <select
             id="after-checkin"
             value={afterId}
             onChange={(e) => setAfterId(e.target.value)}
             disabled={loading}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className={
+              isTwinly
+                ? twinlySelect
+                : "w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            }
           >
             {checkins.map((c) => (
               <option key={c.id} value={c.id}>
@@ -129,7 +182,7 @@ export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps)
 
       <Button
         type="button"
-        className="mt-4"
+        className={cn("mt-4", isTwinly && dashboardCtaPrimary)}
         onClick={runCompare}
         disabled={loading || beforeId === afterId}
       >
@@ -137,7 +190,12 @@ export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps)
       </Button>
 
       {beforeId === afterId ? (
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p
+          className={cn(
+            "mt-2 font-poppins text-xs",
+            isTwinly ? dashboardMuted : "text-muted-foreground",
+          )}
+        >
           Select two different dates.
         </p>
       ) : null}
@@ -152,16 +210,39 @@ export function PhotoComparePanel({ plantId, checkins }: PhotoComparePanelProps)
       ) : null}
 
       {result ? (
-        <div className="mt-4 space-y-3 rounded-lg border border-border bg-muted/30 p-4 text-sm">
+        <div
+          className={cn(
+            "mt-4 space-y-3 p-4 font-poppins text-sm",
+            isTwinly ? twinlyInlineCard : "rounded-lg border border-border bg-muted/30",
+          )}
+        >
           <p>
             <span className="font-medium">Overall: </span>
-            <span className={cn("capitalize", DELTA_STYLE[result.healthDelta])}>
+            <span
+              className={cn(
+                "capitalize",
+                isTwinly
+                  ? result.healthDelta === "improved"
+                    ? "text-[#57B55D]"
+                    : result.healthDelta === "declined"
+                      ? "text-red-400"
+                      : "text-white/70"
+                  : DELTA_STYLE[result.healthDelta],
+              )}
+            >
               {DELTA_LABEL[result.healthDelta]}
             </span>
           </p>
-          <p className="leading-relaxed text-muted-foreground">{result.summary}</p>
+          <p className={cn("leading-relaxed", isTwinly ? dashboardBody : "text-muted-foreground")}>
+            {result.summary}
+          </p>
           {result.visibleChanges.length > 0 ? (
-            <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+            <ul
+              className={cn(
+                "list-inside list-disc space-y-1",
+                isTwinly ? dashboardMuted : "text-muted-foreground",
+              )}
+            >
               {result.visibleChanges.map((change) => (
                 <li key={change}>{change}</li>
               ))}

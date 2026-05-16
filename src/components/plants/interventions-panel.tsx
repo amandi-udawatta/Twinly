@@ -11,17 +11,32 @@ import { ErrorBanner } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { AppAppearance } from "@/components/dashboard/dashboard-theme";
+import {
+  dashboardCtaPrimary,
+  dashboardMuted,
+  dashboardPanel,
+  dashboardPanelTitle,
+  twinlyInlineCard,
+  twinlyLabel,
+  twinlyListRow,
+  twinlySelect,
+} from "@/components/dashboard/dashboard-theme";
 import type { InterventionRow } from "@/lib/data/interventions";
+import { cn } from "@/lib/utils";
 
 interface InterventionsPanelProps {
   plantId: string;
   interventions: InterventionRow[];
+  appearance?: AppAppearance;
 }
 
 export function InterventionsPanel({
   plantId,
   interventions,
+  appearance = "default",
 }: InterventionsPanelProps) {
+  const isTwinly = appearance === "twinly";
   const [type, setType] = useState<string>(INTERVENTION_TYPES[0]);
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -49,20 +64,41 @@ export function InterventionsPanel({
 
   return (
     <section className="space-y-6">
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="font-medium">Log an intervention</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div
+        className={
+          isTwinly
+            ? dashboardPanel
+            : "rounded-xl border border-border bg-card p-4"
+        }
+      >
+        <h3
+          className={
+            isTwinly
+              ? cn(dashboardPanelTitle, "text-base sm:text-lg")
+              : "font-medium"
+          }
+        >
+          Log an intervention
+        </h3>
+        <p
+          className={cn(
+            "mt-1 font-poppins text-sm",
+            isTwinly ? dashboardMuted : "text-muted-foreground",
+          )}
+        >
           Record watering, pruning, and other care you performed.
         </p>
         <div className="mt-4 space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="intervention-type">Type</Label>
+            <Label htmlFor="intervention-type" className={isTwinly ? twinlyLabel : undefined}>
+              Type
+            </Label>
             <select
               id="intervention-type"
               value={type}
               onChange={(e) => setType(e.target.value)}
               disabled={pending}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm capitalize"
+              className={isTwinly ? twinlySelect : "w-full rounded-md border border-border bg-background px-3 py-2 text-sm capitalize"}
             >
               {INTERVENTION_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -72,7 +108,9 @@ export function InterventionsPanel({
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="intervention-note">Notes (optional)</Label>
+            <Label htmlFor="intervention-note" className={isTwinly ? twinlyLabel : undefined}>
+              Notes (optional)
+            </Label>
             <Textarea
               id="intervention-note"
               value={description}
@@ -83,29 +121,57 @@ export function InterventionsPanel({
             />
           </div>
           {error ? <ErrorBanner message={error} /> : null}
-          <Button type="button" onClick={onAdd} disabled={pending}>
+          <Button
+            type="button"
+            onClick={onAdd}
+            disabled={pending}
+            className={isTwinly ? dashboardCtaPrimary : undefined}
+          >
             Add intervention
           </Button>
         </div>
       </div>
 
       {interventions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No interventions logged yet.</p>
+        <p
+          className={cn(
+            "font-poppins text-sm",
+            isTwinly ? dashboardMuted : "text-muted-foreground",
+          )}
+        >
+          No interventions logged yet.
+        </p>
       ) : (
         <ul className="space-y-2">
           {interventions.map((item) => (
             <li
               key={item.id}
-              className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-border px-4 py-3 text-sm"
+              className={
+                isTwinly
+                  ? cn(twinlyListRow, "flex flex-wrap items-start justify-between gap-2")
+                  : "flex flex-wrap items-start justify-between gap-2 rounded-lg border border-border px-4 py-3 text-sm"
+              }
             >
               <div>
-                <p className="font-medium capitalize">
+                <p
+                  className={cn(
+                    "font-poppins font-medium capitalize",
+                    isTwinly ? "text-white" : undefined,
+                  )}
+                >
                   {item.type.replace("_", " ")}
                 </p>
                 {item.description ? (
-                  <p className="mt-1 text-muted-foreground">{item.description}</p>
+                  <p className={cn("mt-1 font-poppins", isTwinly ? dashboardMuted : "text-muted-foreground")}>
+                    {item.description}
+                  </p>
                 ) : null}
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p
+                  className={cn(
+                    "mt-1 font-poppins text-xs",
+                    isTwinly ? dashboardMuted : "text-muted-foreground",
+                  )}
+                >
                   {new Date(item.created_at).toLocaleString()}
                 </p>
               </div>
