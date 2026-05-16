@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ChangesSinceCard } from "@/components/checkins/changes-since-card";
@@ -10,12 +9,11 @@ import { HealthTimelineChart } from "@/components/plants/health-timeline-chart";
 import { InterventionsPanel } from "@/components/plants/interventions-panel";
 import { PhotoComparePanel } from "@/components/plants/photo-compare-panel";
 import { PlantGallery } from "@/components/plants/plant-gallery";
+import { PlantFloatingCheckin } from "@/components/plants/plant-floating-checkin";
 import { QrDisplay } from "@/components/plants/qr-display";
 import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
 import { PageShell } from "@/components/layout/page-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { WeatherSummaryPanel } from "@/components/dashboard/weather-summary-panel";
 import { UpcomingRisksCard } from "@/components/plants/upcoming-risks-card";
 import {
@@ -112,6 +110,11 @@ export default async function PlantPage({ params }: PlantPageProps) {
       })
     : null;
 
+  const scoreDelta =
+    latestAnalysis && history.length >= 2
+      ? latestAnalysis.health_score - history[history.length - 2].health_score
+      : null;
+
   return (
     <PageShell>
       <LocationWeatherBanner show={!weatherContext.locationCity} />
@@ -141,21 +144,16 @@ export default async function PlantPage({ params }: PlantPageProps) {
             ) : null}
           </div>
         </div>
-        <div className="flex flex-col items-center gap-4 sm:items-end">
+        <div className="flex flex-col items-center sm:items-end">
           {latestAnalysis ? (
             <HealthScoreRing score={latestAnalysis.health_score} />
           ) : (
             <p className="text-sm text-muted-foreground">No health score yet</p>
           )}
-          <Link
-            href={`/plants/${id}/checkin`}
-            className={cn(buttonVariants({ size: "lg" }))}
-          >
-            Check in
-          </Link>
         </div>
       </div>
 
+      <div className="pb-28">
       <Tabs defaultValue="analysis" className="space-y-6">
         <TabsList>
           <TabsTrigger value="analysis">Today&apos;s analysis</TabsTrigger>
@@ -167,7 +165,10 @@ export default async function PlantPage({ params }: PlantPageProps) {
         </TabsList>
 
         <TabsContent value="analysis" className="space-y-4">
-          <ChangesSinceCard summary={latestAnalysis?.changes_summary} />
+          <ChangesSinceCard
+            summary={latestAnalysis?.changes_summary}
+            scoreDelta={scoreDelta}
+          />
           {insights.length === 0 ? (
             <p className="text-muted-foreground">
               Complete a check-in to see AI insights.
@@ -275,6 +276,8 @@ export default async function PlantPage({ params }: PlantPageProps) {
           <QrDisplay plantId={id} appUrl={appUrl} />
         </TabsContent>
       </Tabs>
+      <PlantFloatingCheckin plantId={id} />
+      </div>
     </PageShell>
   );
 }

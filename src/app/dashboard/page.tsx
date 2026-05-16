@@ -34,25 +34,24 @@ export default async function DashboardPage() {
         show={!weatherContext.locationCity}
         variant="twinly"
       />
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="flex flex-col gap-6">
         <DashboardPanel
           title="Your garden this week"
           description="One snapshot per species — tap a card to open a plant."
-          className="lg:col-span-2"
-          contentClassName="mt-6"
+          className="min-w-0"
+          contentClassName="min-w-0"
         >
           <GardenSpeciesOverview summaries={speciesSummaries} />
         </DashboardPanel>
         <WeatherSummaryPanel
           appearance="twinly"
+          className="min-w-0"
           weather={weatherContext.weather}
           error={weatherContext.error}
           forecastDays={7}
           forecastLayout="pills"
         />
-        <div className="lg:col-span-3">
-          <EnvironmentalInsightsPanel insights={environmentalInsights} />
-        </div>
+        <EnvironmentalInsightsPanel insights={environmentalInsights} />
       </div>
     </PageShell>
   );
