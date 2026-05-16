@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,7 +26,11 @@ function UserIcon({ className }: { className?: string }) {
   );
 }
 
-export function UserMenu() {
+interface UserMenuProps {
+  variant?: "default" | "hero";
+}
+
+export function UserMenu({ variant = "default" }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -39,24 +44,41 @@ export function UserMenu() {
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, []);
 
+  const isHero = variant === "hero";
+
   return (
     <div ref={rootRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/50 hover:text-primary",
+          isHero
+            ? "flex h-8 w-8 items-center justify-center rounded-full bg-[#E8E4D9] transition-transform hover:scale-105 sm:h-9 sm:w-9"
+            : "flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/50 hover:text-primary",
         )}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Account menu"
       >
-        <UserIcon className="h-5 w-5" />
+        {isHero ? (
+          <Image
+            src="/hero/user-svgrepo-com.svg"
+            alt=""
+            width={22}
+            height={22}
+            className="h-4 w-4 sm:h-5 sm:w-5"
+          />
+        ) : (
+          <UserIcon className="h-5 w-5" />
+        )}
       </button>
       {open ? (
         <div
           role="menu"
-          className="absolute left-0 top-full z-50 mt-2 min-w-[11rem] overflow-hidden rounded-lg border border-border bg-card py-1 shadow-lg"
+          className={cn(
+            "absolute top-full z-50 mt-2 min-w-[11rem] overflow-hidden rounded-lg border border-border bg-card py-1 shadow-lg",
+            isHero ? "right-0" : "left-0",
+          )}
         >
           <Link
             href="/settings"
@@ -80,4 +102,3 @@ export function UserMenu() {
     </div>
   );
 }
-

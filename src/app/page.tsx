@@ -1,43 +1,33 @@
-import Link from "next/link";
-
-import { PageShell } from "@/components/layout/page-shell";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { GalleryThriveSection } from "@/components/home/gallery-thrive/gallery-thrive-section";
+import { LandingFooterSection } from "@/components/home/landing-footer/landing-footer-section";
+import { HeroSection } from "@/components/home/hero-section";
+import { PlantParentsSection } from "@/components/home/plant-parents/plant-parents-section";
+import { SignInGatewaySection } from "@/components/home/sign-in-gateway/sign-in-gateway-section";
+import { TheBrainSection } from "@/components/home/the-brain/the-brain-section";
+import { SiteHeader } from "@/components/layout/site-header";
 import { getSessionUser } from "@/lib/auth/get-user";
+import { lostTumbler, poppins } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
 
 export default async function HomePage() {
   const user = await getSessionUser();
+  const ctaHref = user ? "/plants" : "/auth";
 
   return (
-    <PageShell>
-      <section className="flex min-h-[50vh] flex-col items-center justify-center gap-6 py-16 text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-primary">
-          Twinly
-        </p>
-        <h1 className="font-heading max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">
-          Your plant&apos;s digital twin
-        </h1>
-        <p className="max-w-lg text-muted-foreground">
-          Landing hub — build out your story here later.
-        </p>
-        {user ? (
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/dashboard" className={cn(buttonVariants({ size: "lg" }))}>
-              Dashboard
-            </Link>
-            <Link
-              href="/plants"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-            >
-              My Plants
-            </Link>
-          </div>
-        ) : (
-          <Link href="/auth" className={cn(buttonVariants({ size: "lg" }))}>
-            Get started
-          </Link>
-        )}
-      </section>
-    </PageShell>
+    <main
+      className={cn(
+        lostTumbler.variable,
+        poppins.variable,
+        "bg-[#0d0d0d]",
+      )}
+    >
+      <SiteHeader />
+      <HeroSection ctaHref={ctaHref} />
+      <PlantParentsSection />
+      <TheBrainSection />
+      {!user ? <SignInGatewaySection /> : null}
+      <GalleryThriveSection />
+      <LandingFooterSection />
+    </main>
   );
 }
