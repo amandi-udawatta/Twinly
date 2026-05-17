@@ -45,16 +45,7 @@ export function BrainTimeline({ pulseToken = 0 }: BrainTimelineProps) {
 
   return (
     <div className="relative h-[600px] w-full">
-      {/* Vertical track */}
-      <div
-        className={cn(
-          "absolute top-10 bottom-10 w-1 bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.35)]",
-          TRACK_LEFT,
-        )}
-        aria-hidden
-      />
-
-      {/* Glow nodes — aligned on track */}
+      {/* Glow nodes */}
       {BRAIN_TIMELINE_STEPS.map((step, index) => {
         const isRevealed = revealed.includes(step.id);
         return (
@@ -88,14 +79,23 @@ export function BrainTimeline({ pulseToken = 0 }: BrainTimelineProps) {
               "flex translate-x-12 items-center justify-center lg:translate-x-24",
             )}
           >
-            <Image
-              src={THE_BRAIN_ROBOT}
-              alt="Twinly brain mascot"
-              width={450}
-              height={520}
-              className="h-auto w-full max-w-[350px] object-contain drop-shadow-2xl lg:max-w-[450px]"
-              priority={false}
-            />
+            <motion.div
+              animate={{ y: [0, -18, 0] }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <Image
+                src={THE_BRAIN_ROBOT}
+                alt="Twinly brain mascot"
+                width={640}
+                height={740}
+                className="h-auto w-full max-w-[500px] -scale-x-100 object-contain drop-shadow-2xl lg:max-w-[640px]"
+                priority={false}
+              />
+            </motion.div>
           </motion.div>
         ) : (
           <motion.div

@@ -64,7 +64,7 @@ function HeroInner({ ctaHref }: { ctaHref: string }) {
 
         <Link
           href={ctaHref}
-          className="animate-hero-cta-in font-poppins inline-flex rounded-full bg-[#9CA3AF] px-9 py-3.5 text-base font-medium text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-all hover:scale-[1.03] hover:bg-[#a8afb8] hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] active:scale-[0.98] lg:px-10 lg:py-4"
+          className="animate-hero-cta-in font-poppins inline-flex rounded-full bg-[#9CA3AF] px-9 py-3.5 text-base font-medium text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-all duration-300 hover:scale-[1.03] hover:bg-[#4ADE80] hover:shadow-[0_10px_28px_rgba(74,222,128,0.4)] active:scale-[0.98] lg:px-10 lg:py-4"
         >
           Track my Plants
         </Link>
