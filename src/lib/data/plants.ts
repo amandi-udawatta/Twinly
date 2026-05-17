@@ -2,6 +2,7 @@
  * Server-side Supabase queries for plants, check-ins, and analysis.
  */
 
+import { plantSpeciesKey } from "@/lib/plant-species";
 import { createClient } from "@/lib/supabase/server";
 import {
   fetchWeatherForCity,
@@ -192,7 +193,7 @@ export async function getGardenSpeciesSummaries(
 
   const bySpecies = new Map<string, PlantWithLatestAnalysis[]>();
   for (const plant of plants) {
-    const key = plant.species?.trim().toLowerCase() || "unknown";
+    const key = plantSpeciesKey(plant.species);
     const group = bySpecies.get(key) ?? [];
     group.push(plant);
     bySpecies.set(key, group);

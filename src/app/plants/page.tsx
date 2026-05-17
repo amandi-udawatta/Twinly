@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import {
@@ -12,11 +13,21 @@ import { PageShell } from "@/components/layout/page-shell";
 import { LocationWeatherBanner } from "@/components/weather/location-weather-banner";
 import { getPlantsForUser, getUserLocationCity } from "@/lib/data/plants";
 import { getSessionUser } from "@/lib/auth/get-user";
+import { parseSpeciesSearchParam, plantSpeciesKey } from "@/lib/plant-species";
 import { cn } from "@/lib/utils";
 
-export default async function PlantsPage() {
+export const dynamic = "force-dynamic";
+
+interface PlantsPageProps {
+  searchParams: Promise<{ species?: string }>;
+}
+
+export default async function PlantsPage({ searchParams }: PlantsPageProps) {
   const user = await getSessionUser();
   if (!user) redirect("/auth");
+
+  const { species: speciesParam } = await searchParams;
+  const speciesKey = parseSpeciesSearchParam(speciesParam);
 
   const [plants, locationCity] = await Promise.all([
     getPlantsForUser(user.id),
@@ -34,11 +45,20 @@ export default async function PlantsPage() {
 
   const needsAttention = sorted.some((p) => (p.latest_urgency_score ?? 0) > 7);
 
+  const speciesLabel = speciesKey
+    ? sorted.find((p) => plantSpeciesKey(p.species) === speciesKey)?.species?.trim() ??
+      speciesKey
+    : null;
+
   return (
     <PageShell
       variant="twinly"
       title="My Plants"
-      description="Your garden at a glance — search, filter, and open any plant."
+      description={
+        speciesLabel
+          ? `Plants in your garden — ${speciesLabel}.`
+          : "Your garden at a glance — search, filter, and open any plant."
+      }
     >
       <LocationWeatherBanner show={!locationCity} variant="twinly" />
 
@@ -65,7 +85,15 @@ export default async function PlantsPage() {
         </div>
       ) : (
         <div className="pb-28">
-          <PlantsGrid plants={sorted} appearance="twinly" />
+          <Suspense
+            fallback={
+              <p className={cn("py-12 text-center font-poppins text-sm", dashboardMuted)}>
+                Loading plants…
+              </p>
+            }
+          >
+            <PlantsGrid plants={sorted} appearance="twinly" />
+          </Suspense>
           <PlantsFloatingActions
             appearance="twinly"
             plants={sorted.map((p) => ({

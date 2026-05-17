@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-6">
         <DashboardPanel
           title="Your garden this week"
-          description="One snapshot per species — tap a card to open a plant."
+          description="One snapshot per species — tap a card to view plants of that type."
           className="min-w-0"
           contentClassName="min-w-0"
         >

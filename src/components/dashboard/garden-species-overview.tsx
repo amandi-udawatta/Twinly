@@ -35,7 +35,7 @@ export function GardenSpeciesOverview({ summaries }: GardenSpeciesOverviewProps)
           >
             <article className={cn(dashboardCard, "flex h-full min-h-[22rem] flex-col")}>
               <Link
-                href={`/plants/${item.primaryPlantId}`}
+                href={`/plants?species=${encodeURIComponent(item.speciesKey)}`}
                 className="group block transition-opacity hover:opacity-95"
               >
                 <div className="relative aspect-[16/10] bg-black/50">
@@ -59,7 +59,7 @@ export function GardenSpeciesOverview({ summaries }: GardenSpeciesOverviewProps)
               </Link>
               <div className="flex flex-1 flex-col p-4">
                 <Link
-                  href={`/plants/${item.primaryPlantId}`}
+                  href={`/plants?species=${encodeURIComponent(item.speciesKey)}`}
                   className={cn(
                     "font-poppins text-lg font-semibold capitalize text-[#57B55D] transition-colors hover:text-[#6bc972]",
                   )}
