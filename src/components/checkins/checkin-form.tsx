@@ -26,6 +26,8 @@ import {
   dashboardPanel,
   twinlyLabel,
 } from "@/components/dashboard/dashboard-theme";
+import { parseAnalyzeResponse } from "@/lib/analyze-response";
+import { compressImagesForUpload } from "@/lib/compress-upload-image";
 import { cn } from "@/lib/utils";
 
 interface CheckinFormProps {
@@ -63,25 +65,22 @@ export function CheckinForm({
     setAnalysisContext(null);
 
     try {
+      const compressed = await compressImagesForUpload(files);
+
       const formData = new FormData();
       formData.append("plantId", plantId);
       if (note.trim()) formData.append("userNote", note.trim());
-      files.forEach((f) => formData.append("photos", f));
+      compressed.forEach((f) => formData.append("photos", f));
 
       const res = await fetch("/api/analyze", { method: "POST", body: formData });
-      const json = (await res.json()) as
-        | { report: PlantReport; analysisContext?: AnalysisContext }
-        | { error: string };
-
-      if (!res.ok) {
-        setError("error" in json ? json.error : "Analysis failed.");
+      const result = await parseAnalyzeResponse(res);
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
 
-      if ("report" in json) {
-        setReport(json.report);
-        setAnalysisContext(json.analysisContext ?? null);
-      }
+      setReport(result.report);
+      setAnalysisContext(result.analysisContext ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed.");
     } finally {

@@ -12,6 +12,7 @@ import {
   getPlantById,
 } from "@/lib/data/plants";
 import { isUploadBlob } from "@/lib/upload-file";
+import { MAX_UPLOAD_PAYLOAD_BYTES } from "@/lib/upload-limits";
 import { createClient } from "@/lib/supabase/server";
 import { formatPlantAge } from "@/lib/plant-age";
 import {
@@ -65,6 +66,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Provide 1 to 4 photos." },
         { status: 400 },
+      );
+    }
+
+    const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+
+    if (totalBytes > MAX_UPLOAD_PAYLOAD_BYTES) {
+      return NextResponse.json(
+        {
+          error:
+            "Upload too large. Use fewer or smaller photos (max ~3.5 MB total).",
+        },
+        { status: 413 },
       );
     }
 
@@ -182,8 +195,11 @@ export async function POST(request: Request) {
       analysisContext,
     });
   } catch (err) {
-    const message =
+    const raw =
       err instanceof Error ? err.message : "Analysis failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const message = raw.toLowerCase().includes("bad gateway")
+      ? "AI service was briefly unavailable. Please try again."
+      : raw;
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }
