@@ -91,7 +91,20 @@ export async function getPlantAnalysisHistory(plantId: string) {
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
-  return data ?? [];
+
+  const rows = data ?? [];
+  const latestByCheckin = new Map<string, (typeof rows)[number]>();
+
+  for (const row of rows) {
+    const existing = latestByCheckin.get(row.checkin_id);
+    if (!existing || row.created_at > existing.created_at) {
+      latestByCheckin.set(row.checkin_id, row);
+    }
+  }
+
+  return Array.from(latestByCheckin.values()).sort((a, b) =>
+    a.created_at.localeCompare(b.created_at),
+  );
 }
 
 export async function getCheckinsWithPhotos(plantId: string) {
@@ -293,10 +306,11 @@ export interface EnvironmentalInsight {
   createdAt: string;
 }
 
-/** Recent weather-impact notes across the garden for the dashboard. */
+/**
+ * Latest weather-impact note per plant (one row per plant, most recent check-in).
+ */
 export async function getRecentEnvironmentalInsights(
   userId: string,
-  limit = 5,
 ): Promise<EnvironmentalInsight[]> {
   const supabase = await createClient();
 
@@ -321,18 +335,30 @@ export async function getRecentEnvironmentalInsights(
     .in("plant_id", plantIds)
     .not("weather_impact", "is", null)
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .limit(200);
 
   if (error) throw new Error(error.message);
 
-  return (results ?? [])
-    .filter((row) => row.weather_impact?.trim())
-    .map((row) => ({
+  const seenPlantIds = new Set<string>();
+  const insights: EnvironmentalInsight[] = [];
+
+  for (const row of results ?? []) {
+    if (!row.weather_impact?.trim() || seenPlantIds.has(row.plant_id)) {
+      continue;
+    }
+    seenPlantIds.add(row.plant_id);
+    insights.push({
       id: row.id,
       plantName: nameById.get(row.plant_id) ?? "Plant",
       text: row.weather_impact as string,
       createdAt: row.created_at,
-    }));
+    });
+  }
+
+  return insights.sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
 export async function getUserLocationCity(

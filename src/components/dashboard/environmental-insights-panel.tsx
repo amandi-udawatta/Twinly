@@ -17,14 +17,17 @@ export function EnvironmentalInsightsPanel({
   return (
     <DashboardPanel
       title="Environmental insights"
-      description="Recent weather-related notes from your latest check-ins."
+      description="Latest weather note per plant from your most recent check-in."
     >
       {insights.length === 0 ? (
         <p className={dashboardMuted}>
           Complete check-ins to see how weather affects your plants.
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul
+          className="max-h-72 space-y-3 overflow-y-auto overscroll-contain pr-1"
+          aria-label="Environmental insights list"
+        >
           {insights.map((item) => (
             <li key={item.id} className={cn(dashboardCard, "p-4")}>
               <div className="flex items-center justify-between gap-2 text-xs">
