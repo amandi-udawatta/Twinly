@@ -2,6 +2,7 @@
 
 /**
  * Recharts line chart of health scores over check-ins.
+ * Uses a numeric x-index so multiple Line series do not duplicate axis ticks/tooltips.
  */
 
 import {
@@ -30,10 +31,47 @@ interface HealthTimelineChartProps {
   appearance?: AppAppearance;
 }
 
+type IndexedPoint = HealthTimelinePoint & { index: number };
+
 function healthScoreColor(score: number): string {
   if (score > 70) return "#4ade80";
   if (score >= 50) return "#f59e0b";
   return "#ef4444";
+}
+
+function ChartTooltip({
+  active,
+  payload,
+  isTwinly,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: IndexedPoint; value?: number }>;
+  isTwinly: boolean;
+}) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const point = payload[0]?.payload;
+  if (!point) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl px-3 py-2 font-poppins text-xs shadow-md",
+        isTwinly
+          ? "border border-white/15 bg-black/85 text-white"
+          : "border border-border bg-card text-foreground",
+      )}
+    >
+      <p className={isTwinly ? "text-white/70" : "text-muted-foreground"}>
+        {point.date}
+      </p>
+      <p className="mt-1 font-medium">Score: {point.score}</p>
+    </div>
+  );
 }
 
 export function HealthTimelineChart({
@@ -43,21 +81,13 @@ export function HealthTimelineChart({
   const isTwinly = appearance === "twinly";
   const tickFill = isTwinly ? "rgba(255,255,255,0.55)" : "var(--muted-foreground)";
   const gridStroke = isTwinly ? "rgba(255,255,255,0.12)" : undefined;
-  const tooltipStyle = isTwinly
-    ? {
-        background: "rgba(0,0,0,0.85)",
-        border: "1px solid rgba(255,255,255,0.15)",
-        borderRadius: "12px",
-        color: "#fff",
-        fontFamily: "var(--font-poppins), sans-serif",
-      }
-    : {
-        background: "var(--card)",
-        border: "1px solid var(--border)",
-        borderRadius: "8px",
-      };
 
-  if (data.length === 0) {
+  const indexedData: IndexedPoint[] = data.map((point, index) => ({
+    ...point,
+    index,
+  }));
+
+  if (indexedData.length === 0) {
     return (
       <p
         className={cn(
@@ -74,80 +104,92 @@ export function HealthTimelineChart({
     <div className="w-full">
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            className={isTwinly ? undefined : "stroke-border"}
-            stroke={gridStroke}
-          />
-          <XAxis
-            dataKey="date"
-            tick={{ fill: tickFill, fontSize: 11 }}
-            tickLine={false}
-          />
-          <YAxis
-            domain={[0, 100]}
-            tick={{ fill: tickFill, fontSize: 11 }}
-            tickLine={false}
-          />
-          <Tooltip contentStyle={tooltipStyle} />
-          {data.length > 1
-            ? data.slice(0, -1).map((point, index) => {
-                const next = data[index + 1];
+          <LineChart
+            data={indexedData}
+            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              className={isTwinly ? undefined : "stroke-border"}
+              stroke={gridStroke}
+            />
+            <XAxis
+              dataKey="index"
+              type="number"
+              domain={[0, Math.max(0, indexedData.length - 1)]}
+              ticks={indexedData.map((p) => p.index)}
+              tickFormatter={(index) =>
+                indexedData[Number(index)]?.date ?? ""
+              }
+              tick={{ fill: tickFill, fontSize: 11 }}
+              tickLine={false}
+            />
+            <YAxis
+              domain={[0, 100]}
+              tick={{ fill: tickFill, fontSize: 11 }}
+              tickLine={false}
+            />
+            <Tooltip
+              content={<ChartTooltip isTwinly={isTwinly} />}
+            />
+            {indexedData.length > 1
+              ? indexedData.slice(0, -1).map((point, i) => {
+                  const next = indexedData[i + 1];
+                  return (
+                    <Line
+                      key={`segment-${point.id}-${next.id}`}
+                      data={[point, next]}
+                      type="monotone"
+                      dataKey="score"
+                      stroke={healthScoreColor(next.score)}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={false}
+                      legendType="none"
+                      tooltipType="none"
+                      isAnimationActive={false}
+                    />
+                  );
+                })
+              : null}
+            <Line
+              type="monotone"
+              dataKey="score"
+              stroke="transparent"
+              strokeWidth={0}
+              dot={(props) => {
+                const { cx, cy, payload } = props;
+                if (cx == null || cy == null || !payload) return null;
+                const score = (payload as IndexedPoint).score;
                 return (
-                  <Line
-                    key={`segment-${point.id}-${next.id}`}
-                    data={[point, next]}
-                    type="monotone"
-                    dataKey="score"
-                    stroke={healthScoreColor(next.score)}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={false}
-                    legendType="none"
-                    isAnimationActive={false}
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill={healthScoreColor(score)}
+                    stroke="#0d0d0d"
+                    strokeWidth={1.5}
                   />
                 );
-              })
-            : null}
-          <Line
-            type="monotone"
-            dataKey="score"
-            stroke="transparent"
-            strokeWidth={0}
-            dot={(props) => {
-              const { cx, cy, payload } = props;
-              if (cx == null || cy == null || !payload) return null;
-              const score = (payload as { score: number }).score;
-              return (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={5}
-                  fill={healthScoreColor(score)}
-                  stroke="#0d0d0d"
-                  strokeWidth={1.5}
-                />
-              );
-            }}
-            activeDot={(props) => {
-              const { cx, cy, payload } = props;
-              if (cx == null || cy == null || !payload) return null;
-              const score = (payload as { score: number }).score;
-              return (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={7}
-                  fill={healthScoreColor(score)}
-                  stroke="#f5f5f5"
-                  strokeWidth={2}
-                />
-              );
-            }}
-            isAnimationActive={false}
-          />
-        </LineChart>
+              }}
+              activeDot={(props) => {
+                const { cx, cy, payload } = props;
+                if (cx == null || cy == null || !payload) return null;
+                const score = (payload as IndexedPoint).score;
+                return (
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={7}
+                    fill={healthScoreColor(score)}
+                    stroke="#f5f5f5"
+                    strokeWidth={2}
+                  />
+                );
+              }}
+              isAnimationActive={false}
+            />
+          </LineChart>
         </ResponsiveContainer>
       </div>
       <div
@@ -174,4 +216,3 @@ export function HealthTimelineChart({
     </div>
   );
 }
-
