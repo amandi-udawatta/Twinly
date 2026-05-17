@@ -30,18 +30,8 @@ export function LandingFooterSection() {
 
         <FooterOverlay />
 
-        <div className="relative z-10 flex w-full flex-col items-center px-4 pb-14 pt-0 sm:pb-16 lg:pb-20">
-          <div className="relative -mt-6 flex justify-center sm:-mt-8 lg:-mt-10">
-            <Image
-              src={FOOTER_ASSETS.mascot}
-              alt=""
-              width={120}
-              height={100}
-              className="h-auto w-[88px] object-contain drop-shadow-md sm:w-[104px] lg:w-[120px]"
-            />
-          </div>
-
-          <div className="mt-2 flex w-full max-w-4xl flex-col items-center gap-6 sm:gap-8">
+        <div className="relative z-10 flex w-full flex-col items-center px-4 pb-14 pt-12 sm:pb-16 sm:pt-14 lg:pb-20 lg:pt-16">
+          <div className="flex w-full max-w-4xl flex-col items-center gap-6 sm:gap-8">
             <Link
               href="/"
               className="font-lost-tumbler text-[clamp(3.5rem,14vw,7rem)] uppercase leading-none tracking-tight text-[#4ADE80] transition-opacity hover:opacity-90 lg:text-[7.5rem]"
@@ -83,13 +73,20 @@ function FooterOverlay() {
 
 function FooterTaglines() {
   return (
-    <div className="font-poppins flex flex-col items-center gap-2 text-center sm:gap-3">
-      <p className="text-sm italic text-white sm:text-base lg:text-lg">
+    <div className="font-poppins flex w-full max-w-md flex-col items-center gap-3 text-center sm:max-w-lg sm:gap-4">
+      <p className="text-sm italic leading-relaxed text-white sm:text-base lg:text-lg">
         {FOOTER_TAGLINE.primary}
       </p>
-      <p className="text-xs italic text-white/80 sm:text-sm lg:text-base">
+      <p className="max-w-[28ch] text-xs italic leading-relaxed text-white/80 sm:max-w-none sm:text-sm lg:text-base">
         {FOOTER_TAGLINE.secondary}
       </p>
+      <Image
+        src={FOOTER_ASSETS.mascot}
+        alt=""
+        width={120}
+        height={100}
+        className="mt-1 h-auto w-[72px] object-contain drop-shadow-md sm:mt-2 sm:w-[88px] lg:w-[100px]"
+      />
     </div>
   );
 }

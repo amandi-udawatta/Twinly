@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { UserMenu } from "@/components/layout/user-menu";
+import { GuestAccountMenu, UserMenu } from "@/components/layout/user-menu";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -82,19 +82,7 @@ export function SiteHeaderNav({
         {isAuthenticated ? (
           <UserMenu variant="hero" />
         ) : (
-          <Link
-            href={profileHref}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E8E4D9] transition-transform hover:scale-105 sm:h-9 sm:w-9"
-            aria-label="Sign in"
-          >
-            <Image
-              src="/hero/user-svgrepo-com.svg"
-              alt=""
-              width={22}
-              height={22}
-              className="h-4 w-4 sm:h-5 sm:w-5"
-            />
-          </Link>
+          <GuestAccountMenu signInHref={profileHref} />
         )}
       </div>
     </nav>
